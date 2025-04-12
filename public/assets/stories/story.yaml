@@ -1,0 +1,1672 @@
+id: 'the-forests-secret'
+title: "The Forest's Secret"
+author: 'Game Developer'
+version: '1.5.0'
+description: 'An immersive adventure in an ancient, mystical forest where your choices shape your destiny.'
+tags: ['fantasy', 'mystery', 'adventure', 'interactive']
+
+# Assets required by the story
+assets:
+  images:
+    forest_entrance: 'assets/images/backgrounds/forest_entrance.jpg'
+    forest_clearing: 'assets/images/backgrounds/forest_clearing.jpg'
+    ancient_tree: 'assets/images/backgrounds/ancient_tree.jpg'
+    ruined_temple: 'assets/images/backgrounds/ruined_temple.jpg'
+    forest_path: 'assets/images/backgrounds/forest_path.jpg'
+    magical_crystal: 'assets/images/backgrounds/magical_crystal.jpg'
+    forest_exit: 'assets/images/backgrounds/forest_exit.jpg'
+    sacred_altar: 'assets/images/backgrounds/sacred_altar.jpg'
+    temple_interior: 'assets/images/backgrounds/temple_interior.jpg'
+    night_forest: 'assets/images/backgrounds/night_forest.jpg'
+
+    char_guide_neutral: 'assets/images/characters/guide/neutral.png'
+    char_guide_smiling: 'assets/images/characters/guide/smiling.png'
+    char_guide_concerned: 'assets/images/characters/guide/concerned.png'
+    char_guide_mysterious: 'assets/images/characters/guide/mysterious.png'
+    char_player_neutral: 'assets/images/characters/player/neutral.png'
+    char_player_surprised: 'assets/images/characters/player/surprised.png'
+    char_player_determined: 'assets/images/characters/player/determined.png'
+    char_spirit_ethereal: 'assets/images/characters/spirit/ethereal.png'
+    char_spirit_powerful: 'assets/images/characters/spirit/powerful.png'
+
+  audio:
+    forest_ambience: 'assets/audio/ambience/forest.mp3'
+    mystery_theme: 'assets/audio/music/mystery_theme.mp3'
+    magical_discovery: 'assets/audio/sfx/magical_discovery.mp3'
+    danger_theme: 'assets/audio/music/danger_theme.mp3'
+    victory_theme: 'assets/audio/music/victory_theme.mp3'
+    heart_beat: 'assets/audio/sfx/heart_beat.mp3'
+    crystal_hum: 'assets/audio/sfx/crystal_hum.mp3'
+    leaves_rustle: 'assets/audio/sfx/leaves_rustle.mp3'
+    ancient_whispers: 'assets/audio/sfx/ancient_whispers.mp3'
+    tree_communion: 'assets/audio/sfx/tree_communion.mp3'
+
+  characters:
+    narrator:
+      id: 'narrator'
+      name: 'Narrator'
+      displayName: 'Narrator'
+      textColor: '#EEEEEE'
+      textSpeed: 35
+
+    guide:
+      id: 'guide'
+      name: 'Guide'
+      displayName: 'Forest Guardian'
+      textColor: '#8AFFDB'
+      textSpeed: 30
+
+    player:
+      id: 'player'
+      name: 'Player'
+      displayName: 'You'
+      textColor: '#FFFFFF'
+      textSpeed: 40
+
+    spirit:
+      id: 'spirit'
+      name: 'Spirit'
+      displayName: 'Ancient Spirit'
+      textColor: '#BF9EFF'
+      textSpeed: 25
+
+    tree:
+      id: 'tree'
+      name: 'Tree'
+      displayName: 'Heart Tree'
+      textColor: '#64DD17'
+      textSpeed: 15
+
+  backgrounds:
+    forest_entrance:
+      id: 'forest_entrance'
+      imageId: 'forest_entrance'
+
+    forest_clearing:
+      id: 'forest_clearing'
+      imageId: 'forest_clearing'
+
+    ancient_tree:
+      id: 'ancient_tree'
+      imageId: 'ancient_tree'
+
+    ruined_temple:
+      id: 'ruined_temple'
+      imageId: 'ruined_temple'
+
+    forest_path:
+      id: 'forest_path'
+      imageId: 'forest_path'
+
+    magical_crystal:
+      id: 'magical_crystal'
+      imageId: 'magical_crystal'
+
+    forest_exit:
+      id: 'forest_exit'
+      imageId: 'forest_exit'
+
+    sacred_altar:
+      id: 'sacred_altar'
+      imageId: 'sacred_altar'
+
+    temple_interior:
+      id: 'temple_interior'
+      imageId: 'temple_interior'
+
+    night_forest:
+      id: 'night_forest'
+      imageId: 'night_forest'
+
+# Initial game state
+initialState:
+  hasMetGuide: false
+  discoveredRuin: false
+  hasMap: false
+  friendship: 0
+  hasTreeBlessing: false
+  hasCrystal: false
+  timeOfDay: 'day'
+  spiritEncounter: false
+  courage: 0
+  wisdom: 0
+
+# Starting node
+startNode: 'intro'
+
+# Story nodes
+nodes:
+  # Introduction
+  intro:
+    id: 'intro'
+    type: 'scene'
+    background: 'forest_entrance'
+    characterId: 'narrator'
+    text: 'The ancient Whisperwood Forest looms before you, its towering trees casting long shadows across the moss-covered ground. Legends speak of mystical beings and powerful artifacts hidden within its depths.'
+    nextNode: 'intro_continued'
+    metadata:
+      transition: { type: 'fade', duration: 2.0 }
+      effect: 'ambient_music'
+      animationIn: 'fadeIn'
+
+  intro_continued:
+    id: 'intro_continued'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'A narrow path leads into the forest, almost hidden among the underbrush. The air carries a sweet, earthy scent, and the distant calls of birds echo through the trees.'
+    nextNode: 'path_choice'
+    metadata:
+      textSpeed: 30
+      animationIn: 'fadeIn'
+      effect: { type: 'sound', sound: 'leaves_rustle' }
+
+  # First choice
+  path_choice:
+    id: 'path_choice'
+    type: 'choice'
+    characterId: 'narrator'
+    text: 'What will you do?'
+    choices:
+      - id: 'enter_forest'
+        text: 'Enter the forest boldly'
+        nextNode: 'enter_forest'
+        stateChanges:
+          courage: 1
+
+      - id: 'look_around'
+        text: 'Carefully examine the entrance first'
+        nextNode: 'look_around'
+        stateChanges:
+          wisdom: 1
+
+      - id: 'turn_back'
+        text: 'Turn back while you still can'
+        nextNode: 'turn_back'
+    metadata:
+      choiceAnimation: 'stagger'
+      textEffect: 'glow'
+
+  # Path branches
+  enter_forest:
+    id: 'enter_forest'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'You step confidently onto the forest path, the sounds of the outside world fading with each step you take. The canopy thickens above, dappling the light that reaches the forest floor.'
+    nextNode: 'forest_sounds'
+    metadata:
+      transition: 'slideLeft'
+      effect: { type: 'sound', sound: 'leaves_rustle' }
+
+  forest_sounds:
+    id: 'forest_sounds'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'As you venture deeper, the forest seems to whisper around you. The rustling leaves carry strange, almost melodic patterns that tug at the edge of your consciousness.'
+    nextNode: 'meet_guide'
+    metadata:
+      effect: { type: 'sound', sound: 'ancient_whispers' }
+      textEffect: 'wave'
+
+  look_around:
+    id: 'look_around'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: "With careful observation, you notice details others might miss. There's a small cache hidden among the roots of a tree near the entrance. Inside, you find a weathered map made of what appears to be tree bark."
+    nextNode: 'found_map'
+    metadata:
+      effect: 'sound'
+      textSpeed: 35
+      animationIn: 'fadeIn'
+    stateChanges:
+      hasMap: true
+
+  found_map:
+    id: 'found_map'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: "The map is intricate, showing winding paths through the forest. Particularly interesting is a marking that resembles a massive tree at the forest's heart, and beyond it, an ancient structure depicted with reverent detail."
+    nextNode: 'map_choice'
+    metadata:
+      effect: { type: 'sound', sound: 'magical_discovery' }
+      textEffect: 'glow'
+
+  map_choice:
+    id: 'map_choice'
+    type: 'choice'
+    characterId: 'narrator'
+    text: 'With the map in hand, you consider your next move:'
+    choices:
+      - id: 'use_map'
+        text: 'Follow the map to the heart of the forest'
+        nextNode: 'use_map'
+
+      - id: 'enter_anyway'
+        text: 'Enter the forest but keep your options open'
+        nextNode: 'enter_forest'
+
+      - id: 'turn_back'
+        text: "The map's discoveries are unsettling - turn back"
+        nextNode: 'turn_back'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  use_map:
+    id: 'use_map'
+    type: 'scene'
+    background: 'forest_path'
+    characterId: 'narrator'
+    text: 'With the map guiding your steps, the forest feels less intimidating. The paths that might have confused others seem clear to you, and you move with growing confidence.'
+    nextNode: 'map_guidance'
+    metadata:
+      transition: { type: 'slideLeft', duration: 1.5 }
+      textSpeed: 40
+
+  map_guidance:
+    id: 'map_guidance'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'The map seems almost alive in your hands, the markings subtly shifting as if responding to your thoughts. It draws your attention to a barely visible side path that appears to lead toward the heart of the forest.'
+    nextNode: 'find_clearing'
+    metadata:
+      textEffect: 'wave'
+      emotion: 'surprised'
+
+  turn_back:
+    id: 'turn_back'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: "Something about the forest unsettles you deeply. Perhaps another day, when you're better prepared for whatever mysteries lie within. You turn away, feeling the watchful presence of the trees fade as you retreat."
+    nextNode: 'ending_turned_back'
+    metadata:
+      transition: { type: 'fade', duration: 1.5 }
+      effect: 'sound'
+
+  # Meeting the guide
+  meet_guide:
+    id: 'meet_guide'
+    type: 'scene'
+    background: 'forest_path'
+    characterId: 'narrator'
+    text: 'The path narrows until you can barely see a few feet ahead. Suddenly, the vibrant green light filtering through the leaves shifts, and a figure materializes from behind an ancient oak.'
+    nextNode: 'guide_appearance'
+    metadata:
+      effect: { type: 'flash', duration: 0.3 }
+      transition: 'fade'
+
+  guide_appearance:
+    id: 'guide_appearance'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'A woman with eyes the color of moss and skin etched with patterns resembling tree bark stands before you. Leaves and small flowers are woven into her long hair, which moves gently as if caught in a breeze you cannot feel.'
+    nextNode: 'guide_greeting'
+    metadata:
+      animationIn: 'fadeIn'
+
+  guide_greeting:
+    id: 'guide_greeting'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "The Whisperwood rarely allows strangers to venture this deep without purpose. You have either remarkable luck or you've been called here."
+    nextNode: 'guide_dialogue_1'
+    metadata:
+      textEffect: 'wave'
+      textSpeed: 25
+    stateChanges:
+      hasMetGuide: true
+
+  guide_dialogue_1:
+    id: 'guide_dialogue_1'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "I am a Guardian of this realm. The boundary between your world and the forest's heart. What brings you to this ancient place?"
+    nextNode: 'reply_to_guide'
+    metadata:
+      textSpeed: 30
+      emotion: 'surprised'
+
+  reply_to_guide:
+    id: 'reply_to_guide'
+    type: 'choice'
+    characterId: 'player'
+    text: 'How do you respond to the mysterious guardian?'
+    choices:
+      - id: 'friendly_response'
+        text: "I'm drawn to the forest's beauty and mysteries"
+        nextNode: 'friendly_path'
+        stateChanges:
+          friendship: 2
+
+      - id: 'curious_response'
+        text: 'Is there something special about this forest I should know?'
+        nextNode: 'curious_path'
+        stateChanges:
+          friendship: 1
+          wisdom: 1
+
+      - id: 'cautious_response'
+        text: 'Who exactly are you and why are you watching me?'
+        nextNode: 'cautious_path'
+        stateChanges:
+          friendship: -1
+          courage: 1
+    metadata:
+      choiceAnimation: 'stagger'
+
+  # Response paths
+  friendly_path:
+    id: 'friendly_path'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "A seeker with an appreciative heart! The forest responds well to those who honor its majesty. Perhaps you're meant to discover some of its deeper secrets."
+    nextNode: 'guide_smile'
+    metadata:
+      emotion: 'excited'
+      textEffect: 'glow'
+
+  guide_smile:
+    id: 'guide_smile'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'The trees themselves whisper your arrival. I sense the forest wishes to reveal itself to you - a rare honor indeed.'
+    nextNode: 'guide_offer'
+    metadata:
+      textSpeed: 35
+
+  curious_path:
+    id: 'curious_path'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'Perceptive question. This is no ordinary woodland. The Whisperwood is ancient beyond human reckoning - the trees remember the first dawn, and at its heart lies power that has shaped the very land you walk upon.'
+    nextNode: 'guide_reveals'
+    metadata:
+      textEffect: 'wave'
+
+  guide_reveals:
+    id: 'guide_reveals'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "There is a temple deep within, built by people who understood the language of leaves and bark. They left something there - something that still pulses with the forest's primordial magic."
+    nextNode: 'guide_offer'
+    metadata:
+      effect: { type: 'sound', sound: 'ancient_whispers' }
+
+  cautious_path:
+    id: 'cautious_path'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "Your wariness is understandable, though unnecessary. I am neither human nor spirit, but something of both - born of the union between your kind and the forest's essence, generations ago."
+    nextNode: 'guide_serious'
+    metadata:
+      textSpeed: 25
+      textEffect: 'wave'
+
+  guide_serious:
+    id: 'guide_serious'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'I watch these boundaries to protect both worlds. Those who enter with harmful intent find only endless paths that lead nowhere. Those with pure hearts might discover... more than they imagined.'
+    nextNode: 'guide_offer'
+    metadata:
+      emotion: 'surprised'
+
+  # Guide offers help
+  guide_offer:
+    id: 'guide_offer'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'There is a sacred clearing not far from here - a place where the veil between worlds thins. I could show you the way, if you wish.'
+    nextNode: 'accept_guide'
+    metadata:
+      textEffect: 'glow'
+
+  accept_guide:
+    id: 'accept_guide'
+    type: 'choice'
+    characterId: 'player'
+    text: "Will you accept the forest guardian's guidance?"
+    choices:
+      - id: 'yes_guide'
+        text: 'Yes, I would welcome your guidance'
+        nextNode: 'follow_guide'
+
+      - id: 'no_guide'
+        text: 'I prefer to find my own way'
+        nextNode: 'decline_guide'
+        condition: 'state.hasMap'
+
+      - id: 'no_guide_nomap'
+        text: 'I prefer to explore alone'
+        nextNode: 'guide_warning'
+        condition: '!state.hasMap'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  # Guide paths
+  follow_guide:
+    id: 'follow_guide'
+    type: 'scene'
+    background: 'forest_clearing'
+    characterId: 'narrator'
+    text: 'The forest guardian moves with otherworldly grace, barely disturbing a single leaf as she leads you through passages you would never have found on your own. The trees seem to bend slightly, opening paths that close again after you pass.'
+    nextNode: 'follow_guide_continued'
+    metadata:
+      transition: { type: 'slideLeft', duration: 2.0 }
+      effect: { type: 'sound', sound: 'leaves_rustle' }
+
+  follow_guide_continued:
+    id: 'follow_guide_continued'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'After what could be minutes or hours - time feels fluid here - you emerge into a breathtaking clearing. Ancient standing stones circle the perimeter, and sunlight streams down in radiant beams through an opening in the canopy.'
+    nextNode: 'clearing_dialogue'
+    metadata:
+      textSpeed: 35
+      effect: 'ambient_music'
+
+  clearing_dialogue:
+    id: 'clearing_dialogue'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "This is the Dreamer's Clearing, where those sensitive to the forest's voice often receive visions. From here, we could journey to the Heart Tree - the ancient consciousness of the forest - or to the Temple of Whispers, if you're prepared for its trials."
+    nextNode: 'clearing_choice'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 30
+
+  clearing_choice:
+    id: 'clearing_choice'
+    type: 'choice'
+    characterId: 'player'
+    text: 'Which path calls to you more strongly?'
+    choices:
+      - id: 'to_tree'
+        text: 'The Heart Tree sounds remarkable'
+        nextNode: 'ancient_tree_scene'
+
+      - id: 'to_ruins'
+        text: "I'm drawn to the Temple's mysteries"
+        nextNode: 'ruins_check'
+    metadata:
+      choiceAnimation: 'stagger'
+      effect: { type: 'sound', sound: 'heart_beat' }
+
+  ruins_check:
+    id: 'ruins_check'
+    type: 'branch'
+    condition: 'state.friendship >= 1'
+    successNode: 'to_ruins'
+    failureNode: 'guide_hesitates'
+
+  guide_hesitates:
+    id: 'guide_hesitates'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "The Temple does not welcome all visitors equally. Its magics are... selective. Without the forest's blessing, you may find only danger there. The Heart Tree might need to accept you first."
+    nextNode: 'clearing_choice_after_hesitation'
+    metadata:
+      emotion: 'concerned'
+      textSpeed: 25
+
+  clearing_choice_after_hesitation:
+    id: 'clearing_choice_after_hesitation'
+    type: 'choice'
+    characterId: 'player'
+    text: "How do you respond to the guardian's warning?"
+    choices:
+      - id: 'insist_ruins'
+        text: "I'll take that risk - I want to see the temple"
+        nextNode: 'reluctant_guide_to_ruins'
+        stateChanges:
+          courage: 2
+
+      - id: 'agree_tree'
+        text: "You're right, let's visit the Heart Tree first"
+        nextNode: 'ancient_tree_scene'
+        stateChanges:
+          wisdom: 1
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  reluctant_guide_to_ruins:
+    id: 'reluctant_guide_to_ruins'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'Your determination is impressive, if potentially unwise. Very well - but heed my warnings. Touch nothing within the temple unless invited. The spirits there judge mortals harshly.'
+    nextNode: 'to_ruins_warning'
+    metadata:
+      textSpeed: 25
+      emotion: 'concerned'
+
+  to_ruins_warning:
+    id: 'to_ruins_warning'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'The path ahead will test you. The temple has guardians that cannot be seen until they wish it. Stay close to me.'
+    nextNode: 'ruins_journey'
+    metadata:
+      effect: { type: 'sound', sound: 'danger_theme' }
+
+  ruins_journey:
+    id: 'ruins_journey'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'The forest grows darker and more primal as you follow the guardian. Ancient trees with gnarled faces seem to watch your passage, and distant whispers echo between the trunks.'
+    nextNode: 'ruins_scene'
+    metadata:
+      transition: { type: 'fade', duration: 2.0 }
+      textEffect: 'wave'
+
+  to_ruins:
+    id: 'to_ruins'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'The Temple of Whispers is indeed a place of power. The forest spirits seem to find you worthy of its secrets. Still, we must approach with reverence.'
+    nextNode: 'ruins_respectful_approach'
+    metadata:
+      textEffect: 'glow'
+
+  ruins_respectful_approach:
+    id: 'ruins_respectful_approach'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'The guardian leads you along a path that seems to shimmer slightly, as if not entirely present in your reality. The air grows thick with magic, tingling against your skin.'
+    nextNode: 'ruins_scene'
+    metadata:
+      transition: 'slideLeft'
+      effect: { type: 'sound', sound: 'ancient_whispers' }
+
+  decline_guide:
+    id: 'decline_guide'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "The map you carry is a rare treasure - created by the last human to fully know these woods. It will serve you well, though some paths shift with the forest's moods and may not match what's drawn."
+    nextNode: 'guide_farewell_independent'
+    metadata:
+      textSpeed: 30
+
+  guide_farewell_independent:
+    id: 'guide_farewell_independent'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'May the forest judge you worthy of its secrets. Should you need assistance, simply place your palm against any elder oak and speak my name: Sylvari.'
+    nextNode: 'explore_alone'
+    metadata:
+      effect: { type: 'sound', sound: 'leaves_rustle' }
+      animationOut: 'fadeOut'
+
+  guide_warning:
+    id: 'guide_warning'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "Without map or guide, few mortals find their way through the Whisperwood's defenses. The paths shift when no eyes watch them, and the forest itself may lead you in circles until thirst and exhaustion claim you."
+    nextNode: 'reconsider_guide'
+    metadata:
+      textEffect: 'shake'
+      emotion: 'concerned'
+
+  reconsider_guide:
+    id: 'reconsider_guide'
+    type: 'choice'
+    characterId: 'player'
+    text: 'Do you reconsider your decision?'
+    choices:
+      - id: 'accept_after_warning'
+        text: "Your warning is fair - I'll accept your help"
+        nextNode: 'follow_guide'
+        stateChanges:
+          wisdom: 1
+
+      - id: 'still_decline'
+        text: "I'll find my own path, whatever the risk"
+        nextNode: 'lost_in_forest'
+        stateChanges:
+          courage: 2
+    metadata:
+      choiceAnimation: 'stagger'
+
+  # Exploring alone with map
+  explore_alone:
+    id: 'explore_alone'
+    type: 'scene'
+    background: 'forest_clearing'
+    characterId: 'narrator'
+    text: 'With the map guiding your journey, you navigate the twisting paths with growing confidence. The forest seems to test you occasionally, presenting forks not shown on your chart, but your intuition serves you well.'
+    nextNode: 'explore_alone_continued'
+    metadata:
+      transition: { type: 'slideLeft', duration: 1.5 }
+      textSpeed: 35
+
+  explore_alone_continued:
+    id: 'explore_alone_continued'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'Hours into your journey, you discover a perfect circular clearing. Stone monoliths, weathered by countless seasons, stand in a ceremonial ring. The air here feels charged with potential.'
+    nextNode: 'solo_clearing_choice'
+    metadata:
+      effect: 'ambient_music'
+
+  solo_clearing_choice:
+    id: 'solo_clearing_choice'
+    type: 'choice'
+    characterId: 'player'
+    text: 'Your map shows two significant landmarks nearby. Which will you seek?'
+    choices:
+      - id: 'solo_to_tree'
+        text: "The enormous tree marked as 'The Heart'"
+        nextNode: 'find_ancient_tree'
+
+      - id: 'solo_to_ruins'
+        text: "The structure labeled 'Temple of Whispers'"
+        nextNode: 'find_ruins_alone'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  # Getting lost
+  lost_in_forest:
+    id: 'lost_in_forest'
+    type: 'scene'
+    background: 'forest_path'
+    characterId: 'narrator'
+    text: "Pride becomes your undoing as the forest reveals its true nature. Paths that seemed straight suddenly curve back on themselves. Trees you're certain you've passed appear again and again. The sun's position offers no help as the canopy thickens."
+    nextNode: 'lost_continued'
+    metadata:
+      transition: 'fade'
+      effect: { type: 'ambient_music', sound: 'danger_theme' }
+
+  lost_continued:
+    id: 'lost_continued'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: "Hours pass in disorienting sameness. Your water supply dwindles, and the forest's sounds take on a mocking quality. As twilight approaches, shadows lengthen into threatening forms."
+    nextNode: 'lost_options'
+    metadata:
+      textEffect: 'shake'
+      textSpeed: 30
+    stateChanges:
+      timeOfDay: 'dusk'
+
+  lost_options:
+    id: 'lost_options'
+    type: 'choice'
+    characterId: 'player'
+    text: 'Night is approaching. What will you do?'
+    choices:
+      - id: 'call_for_help'
+        text: "Swallow your pride and call for the guardian's help"
+        nextNode: 'guide_rescues'
+
+      - id: 'keep_wandering'
+        text: 'Trust your instincts and continue searching for a way'
+        nextNode: 'stumble_upon_tree'
+        stateChanges:
+          courage: 1
+    metadata:
+      choiceAnimation: 'fadeIn'
+      effect: { type: 'sound', sound: 'leaves_rustle' }
+
+  guide_rescues:
+    id: 'guide_rescues'
+    type: 'scene'
+    background: 'night_forest'
+    characterId: 'narrator'
+    text: 'As darkness falls completely, you finally admit defeat. "Sylvari," you call, your voice breaking slightly. For long moments, nothing happens. Then, a soft blue glow appears between the trees.'
+    nextNode: 'guide_rescue_appearance'
+    metadata:
+      transition: { type: 'fade', duration: 1.5 }
+      effect: { type: 'sound', sound: 'magical_discovery' }
+    stateChanges:
+      timeOfDay: 'night'
+
+  guide_rescue_appearance:
+    id: 'guide_rescue_appearance'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'The guardian emerges from the darkness, her skin emitting a gentle phosphorescence. In the night, her otherworldly nature is impossible to deny - she appears almost translucent, with currents of energy flowing beneath her bark-like skin.'
+    nextNode: 'guide_rescue_dialogue'
+    metadata:
+      textEffect: 'glow'
+
+  guide_rescue_dialogue:
+    id: 'guide_rescue_dialogue'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: 'The forest can be cruel to those who challenge it directly. Yet you had the wisdom to call for aid before the night creatures found you. That earns you another chance.'
+    nextNode: 'guide_leads_to_tree'
+    metadata:
+      textSpeed: 25
+      emotion: 'concerned'
+    stateChanges:
+      friendship: 1
+      wisdom: 1
+
+  guide_leads_to_tree:
+    id: 'guide_leads_to_tree'
+    type: 'dialogue'
+    characterId: 'guide'
+    text: "I will take you to the Heart Tree. It's safer than remaining in the open forest at night, and perhaps its wisdom will serve you better than blind wandering."
+    nextNode: 'night_journey_to_tree'
+    metadata:
+      animationOut: 'fadeOut'
+
+  night_journey_to_tree:
+    id: 'night_journey_to_tree'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: "The guardian's glow illuminates your path as she leads you through the nocturnal forest. Strange eyes watch from hollow logs and branches, but nothing approaches while you're under her protection."
+    nextNode: 'ancient_tree_scene_night'
+    metadata:
+      transition: { type: 'slideLeft', duration: 2.0 }
+      textEffect: 'wave'
+
+  stumble_upon_tree:
+    id: 'stumble_upon_tree'
+    type: 'dialogue'
+    characterId: 'narrator'
+    text: 'As twilight deepens into true darkness, desperation sharpens your senses. A faint blue luminescence catches your eye - too steady to be fireflies, too patterned to be random.'
+    nextNode: 'follow_blue_light'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 30
+
+  ancient_tree_scene:
+    id: 'ancient_tree_scene'
+    type: 'scene'
+    background: 'ancient_tree'
+    text: 'You stand before an enormous tree that must be thousands of years old. Its bark glows with a faint blue light, and the air around it feels charged with energy.'
+    characterId: 'narrator'
+    nextNode: 'tree_dialogue'
+    metadata:
+      transition: { type: 'fade', duration: 1.2 }
+      effect: 'ambient_music'
+      audio: 'mystery_theme'
+
+  find_ancient_tree:
+    id: 'find_ancient_tree'
+    type: 'scene'
+    background: 'ancient_tree'
+    text: 'You come upon a massive tree that dominates a clearing. Its trunk must be thirty feet across, and its bark shimmers with an otherworldly blue glow.'
+    characterId: 'narrator'
+    nextNode: 'solo_tree_investigation'
+    metadata:
+      transition: 'slideLeft'
+      audio: 'mystery_theme'
+
+  tree_dialogue:
+    id: 'tree_dialogue'
+    type: 'dialogue'
+    text: "This is the Heart Tree. It's said to be connected to every living thing in the forest. Some believe it grants wisdom to those who commune with it."
+    characterId: 'guide'
+    condition: 'state.hasMetGuide'
+    nextNode: 'tree_choice'
+    metadata:
+      textSpeed: 25
+      animationIn: 'fadeIn'
+      emotion: 'excited'
+
+  solo_tree_investigation:
+    id: 'solo_tree_investigation'
+    type: 'dialogue'
+    text: "As you approach the tree, you feel a strange sensation, as if it's aware of your presence. The blue glow intensifies slightly."
+    characterId: 'narrator'
+    nextNode: 'solo_tree_choice'
+    metadata:
+      textEffect: 'glow'
+
+  tree_choice:
+    id: 'tree_choice'
+    type: 'choice'
+    text: 'What would you like to do?'
+    choices:
+      - text: 'Place your hand on the tree'
+        nextNode: 'touch_tree_guided'
+
+      - text: 'Ask about the ruins'
+        nextNode: 'guide_explains_ruins'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  solo_tree_choice:
+    id: 'solo_tree_choice'
+    type: 'choice'
+    text: 'What do you do?'
+    choices:
+      - text: 'Place your hand on the tree'
+        nextNode: 'touch_tree_solo'
+
+      - text: 'Leave and try to find the ruins'
+        nextNode: 'attempt_find_ruins'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  touch_tree_guided:
+    id: 'touch_tree_guided'
+    type: 'dialogue'
+    text: "As your hand touches the bark, a wave of warmth flows through you. You feel connected to the forest in a way you can't explain."
+    characterId: 'narrator'
+    stateChanges:
+      hasTreeBlessing: true
+    nextNode: 'tree_vision'
+    metadata:
+      effect: { type: 'flash', duration: 0.5 }
+      audio: 'magical_discovery'
+      textEffect: 'glow'
+
+  touch_tree_solo:
+    id: 'touch_tree_solo'
+    type: 'dialogue'
+    text: 'When your fingers touch the bark, a surge of energy courses through your body. Visions of the forest flash before your eyes.'
+    characterId: 'narrator'
+    stateChanges:
+      hasTreeBlessing: true
+    nextNode: 'tree_vision_solo'
+    metadata:
+      effect: 'flash'
+      audio: 'magical_discovery'
+      textEffect: 'wave'
+
+  tree_vision:
+    id: 'tree_vision'
+    type: 'dialogue'
+    text: 'For a brief moment, you see the forest as if from above - and you clearly see the path to the ancient ruins.'
+    characterId: 'narrator'
+    nextNode: 'guide_reaction_to_vision'
+    metadata:
+      textSpeed: 20
+      textEffect: 'glow'
+
+  guide_reaction_to_vision:
+    id: 'guide_reaction_to_vision'
+    type: 'dialogue'
+    text: "You've been blessed by the Heart Tree! That's rare indeed. Now I understand - the forest wants you to see the ruins."
+    characterId: 'guide'
+    stateChanges:
+      friendship: 2
+    nextNode: 'after_tree_choice'
+    metadata:
+      emotion: 'excited'
+      textSpeed: 30
+
+  tree_vision_solo:
+    id: 'tree_vision_solo'
+    type: 'dialogue'
+    text: "In your mind's eye, you see a stone structure deep in the forest, and somehow you know exactly how to get there."
+    characterId: 'narrator'
+    stateChanges:
+      discoveredRuin: true
+    nextNode: 'after_tree_solo'
+    metadata:
+      textEffect: 'wave'
+
+  after_tree_choice:
+    id: 'after_tree_choice'
+    type: 'choice'
+    text: 'What will you do now?'
+    choices:
+      - text: 'Ask to go to the ruins'
+        nextNode: 'to_ruins_with_blessing'
+
+      - text: "I've seen enough, I'd like to leave"
+        nextNode: 'guide_leads_out'
+    metadata:
+      choiceAnimation: 'slideIn'
+
+  after_tree_solo:
+    id: 'after_tree_solo'
+    type: 'choice'
+    text: 'What will you do now?'
+    choices:
+      - text: 'Follow the vision to the ruins'
+        nextNode: 'find_ruins_with_vision'
+
+      - text: 'Leave the forest'
+        nextNode: 'find_exit_solo'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  guide_explains_ruins:
+    id: 'guide_explains_ruins'
+    type: 'dialogue'
+    text: "The ruins are remains of a temple built by ancient people who worshipped the forest spirits. It's said a magical crystal still rests there."
+    characterId: 'guide'
+    nextNode: 'ruins_explanation_choice'
+    metadata:
+      textSpeed: 25
+
+  ruins_explanation_choice:
+    id: 'ruins_explanation_choice'
+    type: 'choice'
+    text: 'How do you respond?'
+    choices:
+      - text: "I'd like to see these ruins"
+        nextNode: 'ruins_check'
+
+      - text: 'I want to touch the tree first'
+        nextNode: 'touch_tree_guided'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  to_ruins_with_blessing:
+    id: 'to_ruins_with_blessing'
+    type: 'dialogue'
+    text: "With the Heart Tree's blessing, you'll be safe. Let's go to the ruins - they may reveal their secrets to you now."
+    characterId: 'guide'
+    nextNode: 'ruins_scene_blessed'
+    metadata:
+      animationOut: 'fadeOut'
+
+  ruins_scene:
+    id: 'ruins_scene'
+    type: 'scene'
+    background: 'ruined_temple'
+    text: 'After a journey through dense forest, you arrive at ancient stone ruins. Crumbling pillars and overgrown steps lead to what once was a grand temple.'
+    characterId: 'narrator'
+    nextNode: 'ruins_description'
+    metadata:
+      transition: { type: 'fade', duration: 1.5 }
+      audio: 'mystery_theme'
+
+  ruins_scene_blessed:
+    id: 'ruins_scene_blessed'
+    type: 'scene'
+    background: 'ruined_temple'
+    text: 'The ruins seem to welcome you. The ancient stones glow faintly with the same blue light as the Heart Tree, recognizing its blessing upon you.'
+    characterId: 'narrator'
+    nextNode: 'ruins_discovery_blessed'
+    metadata:
+      transition: 'fade'
+      effect: 'glow'
+      audio: 'mystery_theme'
+      textEffect: 'glow'
+
+  ruins_description:
+    id: 'ruins_description'
+    type: 'dialogue'
+    text: 'This was once a temple to the forest spirits. Be careful what you touch - not all the magic here is benevolent to strangers.'
+    characterId: 'guide'
+    condition: 'state.hasMetGuide'
+    nextNode: 'ruins_exploration'
+    metadata:
+      textSpeed: 25
+      emotion: 'surprised'
+
+  find_ruins_alone:
+    id: 'find_ruins_alone'
+    type: 'scene'
+    background: 'ruined_temple'
+    text: 'After following your map and intuition, you discover ancient ruins hidden in the forest. Stone pillars covered in moss mark what was once a grand entrance.'
+    characterId: 'narrator'
+    nextNode: 'solo_ruins_exploration'
+    metadata:
+      transition: { type: 'slideLeft', duration: 1.2 }
+      audio: 'mystery_theme'
+
+  find_ruins_with_vision:
+    id: 'find_ruins_with_vision'
+    type: 'scene'
+    background: 'ruined_temple'
+    text: 'Guided by the vision from the Heart Tree, you find your way directly to the ruins. The stones seem to glow faintly as you approach, as if recognizing you.'
+    characterId: 'narrator'
+    nextNode: 'blessed_ruins_solo'
+    metadata:
+      transition: 'fade'
+      effect: 'glow'
+      audio: 'mystery_theme'
+      textEffect: 'glow'
+
+  attempt_find_ruins:
+    id: 'attempt_find_ruins'
+    type: 'branch'
+    condition: 'state.hasMap'
+    successNode: 'find_ruins_alone'
+    failureNode: 'lost_in_forest'
+
+  ruins_exploration:
+    id: 'ruins_exploration'
+    type: 'choice'
+    text: 'What do you want to investigate?'
+    choices:
+      - text: 'The central altar'
+        nextNode: 'altar_examination'
+
+      - text: 'The wall inscriptions'
+        nextNode: 'wall_inscriptions'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  solo_ruins_exploration:
+    id: 'solo_ruins_exploration'
+    type: 'choice'
+    text: 'What will you investigate?'
+    choices:
+      - text: 'The strange altar in the center'
+        nextNode: 'solo_altar'
+
+      - text: 'Explore around the perimeter first'
+        nextNode: 'perimeter_exploration'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  blessed_ruins_solo:
+    id: 'blessed_ruins_solo'
+    type: 'dialogue'
+    text: "With the Heart Tree's blessing, you sense exactly where to go. You're drawn to the central chamber of the ruins."
+    characterId: 'narrator'
+    nextNode: 'find_crystal_blessed_solo'
+    metadata:
+      textEffect: 'glow'
+      animationIn: 'fadeIn'
+
+  altar_examination:
+    id: 'altar_examination'
+    type: 'dialogue'
+    text: 'The central altar is made of smooth stone that seems untouched by time. In its center is a small indentation, as if something valuable once rested there.'
+    characterId: 'narrator'
+    nextNode: 'altar_choice'
+    metadata:
+      textSpeed: 20
+
+  altar_choice:
+    id: 'altar_choice'
+    type: 'choice'
+    text: 'What do you do?'
+    choices:
+      - text: 'Place your hand on the altar'
+        nextNode: 'touch_altar_check'
+
+      - text: 'Ask the guide about it'
+        nextNode: 'guide_explains_altar'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  touch_altar_check:
+    id: 'touch_altar_check'
+    type: 'branch'
+    condition: 'state.hasTreeBlessing'
+    successNode: 'altar_responds_blessed'
+    failureNode: 'altar_warning'
+
+  altar_responds_blessed:
+    id: 'altar_responds_blessed'
+    type: 'scene'
+    background: 'magical_crystal'
+    text: 'As your blessed hand touches the altar, the stone begins to glow. A compartment opens, revealing a brilliant crystal pulsing with blue light.'
+    characterId: 'narrator'
+    nextNode: 'crystal_discovery'
+    metadata:
+      transition: { type: 'flash', duration: 0.7 }
+      effect: 'flash'
+      audio: 'magical_discovery'
+      textEffect: 'glow'
+
+  altar_warning:
+    id: 'altar_warning'
+    type: 'dialogue'
+    text: "Wait! Don't touch that without the Heart Tree's blessing. Let's explore elsewhere first."
+    characterId: 'guide'
+    nextNode: 'ruins_exploration_after_warning'
+    metadata:
+      emotion: 'surprised'
+      textSpeed: 35
+      textEffect: 'shake'
+
+  ruins_exploration_after_warning:
+    id: 'ruins_exploration_after_warning'
+    type: 'choice'
+    text: 'What would you like to do instead?'
+    choices:
+      - text: 'Read the wall inscriptions'
+        nextNode: 'wall_inscriptions'
+
+      - text: 'Return to the Heart Tree first'
+        nextNode: 'return_to_tree'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  return_to_tree:
+    id: 'return_to_tree'
+    type: 'dialogue'
+    text: 'You decide to return to the Heart Tree before exploring the ruins further.'
+    characterId: 'narrator'
+    nextNode: 'ancient_tree_scene'
+    metadata:
+      transition: 'slideRight'
+      animationOut: 'fadeOut'
+
+  wall_inscriptions:
+    id: 'wall_inscriptions'
+    type: 'dialogue'
+    text: "The walls are covered in ancient symbols. They seem to tell a story about a crystal that channeled the forest's energy."
+    characterId: 'narrator'
+    nextNode: 'inscriptions_translation'
+    metadata:
+      textSpeed: 20
+      textEffect: 'wave'
+
+  inscriptions_translation:
+    id: 'inscriptions_translation'
+    type: 'dialogue'
+    text: 'The inscriptions speak of a crystal that connected the temple to the Heart Tree. Only those blessed by the tree could unlock its power.'
+    characterId: 'guide'
+    condition: 'state.hasMetGuide'
+    nextNode: 'after_translation_choice'
+    metadata:
+      textSpeed: 25
+
+  after_translation_choice:
+    id: 'after_translation_choice'
+    type: 'choice'
+    text: 'What will you do next?'
+    choices:
+      - text: 'Examine the altar'
+        nextNode: 'altar_examination'
+
+      - text: "We should get the tree's blessing first"
+        nextNode: 'return_to_tree'
+        condition: '!state.hasTreeBlessing'
+
+      - text: "Try the altar with the tree's blessing"
+        nextNode: 'altar_responds_blessed'
+        condition: 'state.hasTreeBlessing'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  guide_explains_altar:
+    id: 'guide_explains_altar'
+    type: 'dialogue'
+    text: "This altar once held a powerful crystal that channeled the forest's magic. The legends say only one blessed by the Heart Tree can retrieve it."
+    characterId: 'guide'
+    nextNode: 'after_altar_explanation'
+    metadata:
+      textSpeed: 25
+      emotion: 'excited'
+
+  after_altar_explanation:
+    id: 'after_altar_explanation'
+    type: 'choice'
+    text: 'What will you do?'
+    choices:
+      - text: "Let's get the tree's blessing first"
+        nextNode: 'return_to_tree'
+        condition: '!state.hasTreeBlessing'
+
+      - text: "I already have the blessing, I'll try"
+        nextNode: 'altar_responds_blessed'
+        condition: 'state.hasTreeBlessing'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  solo_altar:
+    id: 'solo_altar'
+    type: 'dialogue'
+    text: 'The stone altar has a strange indentation in its center. Something valuable must have once been placed here.'
+    characterId: 'narrator'
+    nextNode: 'solo_altar_choice'
+    metadata:
+      textSpeed: 20
+
+  solo_altar_choice:
+    id: 'solo_altar_choice'
+    type: 'choice'
+    text: 'What do you do?'
+    choices:
+      - text: 'Place your hand on the altar'
+        nextNode: 'solo_altar_touch_check'
+
+      - text: 'Look around for clues first'
+        nextNode: 'perimeter_exploration'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  solo_altar_touch_check:
+    id: 'solo_altar_touch_check'
+    type: 'branch'
+    condition: 'state.hasTreeBlessing'
+    successNode: 'solo_altar_success'
+    failureNode: 'solo_altar_failure'
+
+  solo_altar_success:
+    id: 'solo_altar_success'
+    type: 'scene'
+    background: 'magical_crystal'
+    text: 'As your blessed hand touches the altar, the stone begins to glow. A compartment opens, revealing a brilliant crystal pulsing with blue light.'
+    characterId: 'narrator'
+    nextNode: 'solo_crystal_discovery'
+    metadata:
+      transition: 'flash'
+      effect: { type: 'flash', duration: 0.8 }
+      audio: 'magical_discovery'
+      textEffect: 'glow'
+
+  solo_altar_failure:
+    id: 'solo_altar_failure'
+    type: 'dialogue'
+    text: 'You place your hand on the altar, but nothing happens. You feel a sense that something is missing - perhaps you need some kind of blessing or key to activate it.'
+    characterId: 'narrator'
+    nextNode: 'solo_altar_failure_choice'
+    metadata:
+      textSpeed: 25
+      emotion: 'surprised'
+
+  solo_altar_failure_choice:
+    id: 'solo_altar_failure_choice'
+    type: 'choice'
+    text: 'What will you do now?'
+    choices:
+      - text: 'Return to the ancient tree'
+        nextNode: 'find_ancient_tree'
+
+      - text: 'Explore the ruins further'
+        nextNode: 'perimeter_exploration'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  perimeter_exploration:
+    id: 'perimeter_exploration'
+    type: 'dialogue'
+    text: 'As you explore the perimeter of the ruins, you find ancient carvings depicting people communing with a massive tree before approaching the altar.'
+    characterId: 'narrator'
+    nextNode: 'perimeter_discovery'
+    metadata:
+      textSpeed: 20
+      animationIn: 'fadeIn'
+
+  perimeter_discovery:
+    id: 'perimeter_discovery'
+    type: 'dialogue'
+    text: "The carvings suggest that visitors must receive a blessing from the forest's Heart Tree before they can unlock the altar's secrets."
+    characterId: 'narrator'
+    nextNode: 'after_perimeter_discovery'
+    metadata:
+      textSpeed: 22
+      textEffect: 'wave'
+
+  after_perimeter_discovery:
+    id: 'after_perimeter_discovery'
+    type: 'choice'
+    text: 'What will you do with this information?'
+    choices:
+      - text: 'Seek out the ancient tree first'
+        nextNode: 'find_ancient_tree'
+
+      - text: 'Try the altar anyway'
+        nextNode: 'solo_altar_failure'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  crystal_discovery:
+    id: 'crystal_discovery'
+    type: 'dialogue'
+    text: "The Forest Crystal! I never thought I'd see it revealed. The tree has truly blessed you - you may take it if you wish."
+    characterId: 'guide'
+    nextNode: 'crystal_choice'
+    metadata:
+      emotion: 'excited'
+      textSpeed: 30
+      textEffect: 'glow'
+
+  solo_crystal_discovery:
+    id: 'solo_crystal_discovery'
+    type: 'dialogue'
+    text: "The crystal bathes you in blue light. As you look at it, you understand intuitively that this is the heart of the temple's power - connected to the ancient tree."
+    characterId: 'narrator'
+    nextNode: 'solo_crystal_choice'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 20
+
+  find_crystal_blessed_solo:
+    id: 'find_crystal_blessed_solo'
+    type: 'scene'
+    background: 'magical_crystal'
+    text: "In the central chamber, you find an altar. As you approach, guided by the tree's blessing, a compartment opens to reveal a glowing blue crystal."
+    characterId: 'narrator'
+    nextNode: 'solo_crystal_choice'
+    metadata:
+      transition: { type: 'fade', duration: 1.2 }
+      effect: 'flash'
+      audio: 'magical_discovery'
+      textEffect: 'glow'
+
+  crystal_choice:
+    id: 'crystal_choice'
+    type: 'choice'
+    text: 'What will you do with the crystal?'
+    choices:
+      - text: 'Take the crystal with you'
+        nextNode: 'take_crystal_guided'
+        stateChanges:
+          hasCrystal: true
+
+      - text: 'Leave it where it belongs'
+        nextNode: 'leave_crystal_guided'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  solo_crystal_choice:
+    id: 'solo_crystal_choice'
+    type: 'choice'
+    text: 'What will you do with the crystal?'
+    choices:
+      - text: 'Take the crystal with you'
+        nextNode: 'take_crystal_solo'
+        stateChanges:
+          hasCrystal: true
+
+      - text: 'Leave the crystal in its place'
+        nextNode: 'leave_crystal_solo'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  take_crystal_guided:
+    id: 'take_crystal_guided'
+    type: 'dialogue'
+    text: "The crystal has chosen you. With it, you'll always find your way in any forest, and the spirits of nature will look kindly upon you."
+    characterId: 'guide'
+    nextNode: 'after_crystal_decision'
+    metadata:
+      textSpeed: 25
+      textEffect: 'glow'
+
+  leave_crystal_guided:
+    id: 'leave_crystal_guided'
+    type: 'dialogue'
+    text: 'A noble decision. The forest will remember your respect. Sometimes the greatest gift is knowing when not to take something.'
+    characterId: 'guide'
+    stateChanges:
+      friendship: 3
+    nextNode: 'after_crystal_decision'
+    metadata:
+      emotion: 'excited'
+      textSpeed: 25
+
+  take_crystal_solo:
+    id: 'take_crystal_solo'
+    type: 'dialogue'
+    text: 'As you take the crystal, it pulses with light. You feel a connection to the forest that you know will never fade.'
+    characterId: 'narrator'
+    nextNode: 'after_crystal_solo'
+    metadata:
+      textEffect: 'glow'
+      effect: { type: 'flash', duration: 0.3 }
+
+  leave_crystal_solo:
+    id: 'leave_crystal_solo'
+    type: 'dialogue'
+    text: "You decide to leave the crystal where it belongs. As you step back from the altar, you feel the forest's approval wash over you like a warm breeze."
+    characterId: 'narrator'
+    nextNode: 'after_crystal_solo'
+    metadata:
+      textSpeed: 22
+      animationIn: 'fadeIn'
+
+  after_crystal_decision:
+    id: 'after_crystal_decision'
+    type: 'dialogue'
+    text: "Our journey is nearing its end. Would you like to leave the forest now, or is there somewhere else you'd like to visit?"
+    characterId: 'guide'
+    nextNode: 'final_choice_guided'
+    metadata:
+      textSpeed: 25
+      animationIn: 'fadeIn'
+
+  after_crystal_solo:
+    id: 'after_crystal_solo'
+    type: 'dialogue'
+    text: "Having discovered the secret of the ruins, you feel your adventure drawing to a close. It's time to decide what to do next."
+    characterId: 'narrator'
+    nextNode: 'final_choice_solo'
+    metadata:
+      textSpeed: 22
+
+  final_choice_guided:
+    id: 'final_choice_guided'
+    type: 'choice'
+    text: 'What would you like to do?'
+    choices:
+      - text: "I'm ready to leave the forest"
+        nextNode: 'guide_leads_out'
+
+      - text: "I'd like to visit the Heart Tree once more"
+        nextNode: 'final_tree_visit'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  final_choice_solo:
+    id: 'final_choice_solo'
+    type: 'choice'
+    text: 'What will you do now?'
+    choices:
+      - text: 'Find your way out of the forest'
+        nextNode: 'exit_forest_solo'
+
+      - text: 'Return to the ancient tree one last time'
+        nextNode: 'final_tree_visit_solo'
+    metadata:
+      choiceAnimation: 'fadeIn'
+
+  guide_leads_out:
+    id: 'guide_leads_out'
+    type: 'scene'
+    background: 'forest_exit'
+    text: 'The guide leads you back through the forest by paths that seem much clearer now. Eventually, you reach the edge of the woods.'
+    characterId: 'narrator'
+    nextNode: 'guide_farewell'
+    metadata:
+      transition: { type: 'slideLeft', duration: 1.5 }
+      audio: 'forest_ambience'
+
+  guide_farewell:
+    id: 'guide_farewell'
+    type: 'dialogue'
+    text: "This is where we part ways, friend. The forest will remember you, as will I. You're welcome to return anytime."
+    characterId: 'guide'
+    nextNode: 'ending_with_guide'
+    metadata:
+      emotion: 'excited'
+      textSpeed: 20
+      animationIn: 'fadeIn'
+
+  ending_with_guide:
+    id: 'ending_with_guide'
+    type: 'branch'
+    condition: 'state.hasCrystal'
+    successNode: 'ending_with_crystal'
+    failureNode: 'ending_no_crystal'
+
+  ending_with_crystal:
+    id: 'ending_with_crystal'
+    type: 'dialogue'
+    text: 'As you leave the forest with the crystal safely tucked away, you know that a part of the ancient woods will always be with you, guiding your path through life.'
+    characterId: 'narrator'
+    nextNode: 'ending_credits'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 18
+      animationIn: 'fadeIn'
+
+  ending_no_crystal:
+    id: 'ending_no_crystal'
+    type: 'dialogue'
+    text: "You leave the forest changed by your experience. Though you didn't take anything physical, the memories and wisdom you gained will stay with you forever."
+    characterId: 'narrator'
+    nextNode: 'ending_credits'
+    metadata:
+      textSpeed: 18
+      animationIn: 'fadeIn'
+
+  exit_forest_solo:
+    id: 'exit_forest_solo'
+    type: 'branch'
+    condition: 'state.hasMap || state.hasTreeBlessing'
+    successNode: 'find_exit_success'
+    failureNode: 'lost_but_saved'
+
+  find_exit_success:
+    id: 'find_exit_success'
+    type: 'scene'
+    background: 'forest_exit'
+    text: 'With the help of your map and intuition, you navigate back through the forest and eventually find your way to the entrance.'
+    characterId: 'narrator'
+    nextNode: 'solo_exit_reflection'
+    metadata:
+      transition: 'fade'
+      audio: 'forest_ambience'
+
+  lost_but_saved:
+    id: 'lost_but_saved'
+    type: 'scene'
+    background: 'forest_path'
+    text: "After becoming lost again, a familiar figure appears on the path - it's the forest guide, who seems to have been watching over you from afar."
+    characterId: 'narrator'
+    nextNode: 'guide_final_rescue'
+    metadata:
+      transition: { type: 'slideLeft', duration: 0.8 }
+
+  guide_final_rescue:
+    id: 'guide_final_rescue'
+    type: 'dialogue'
+    text: "I thought you might need some help finding your way out. The forest can be tricky, even after you've found its secrets."
+    characterId: 'guide'
+    nextNode: 'guide_leads_out'
+    metadata:
+      emotion: 'surprised'
+      textSpeed: 25
+
+  solo_exit_reflection:
+    id: 'solo_exit_reflection'
+    type: 'branch'
+    condition: 'state.hasCrystal'
+    successNode: 'solo_exit_with_crystal'
+    failureNode: 'solo_exit_no_crystal'
+
+  solo_exit_with_crystal:
+    id: 'solo_exit_with_crystal'
+    type: 'dialogue'
+    text: 'As you leave the forest with the crystal in your possession, you feel its energy resonating with you. You know your connection to this place will never truly be broken.'
+    characterId: 'narrator'
+    nextNode: 'ending_credits'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 20
+      animationIn: 'fadeIn'
+
+  solo_exit_no_crystal:
+    id: 'solo_exit_no_crystal'
+    type: 'dialogue'
+    text: "You exit the forest, taking with you only memories and the wisdom you've gained. Sometimes the greatest treasures can't be held in your hands."
+    characterId: 'narrator'
+    nextNode: 'ending_credits'
+    metadata:
+      textSpeed: 20
+      animationIn: 'fadeIn'
+
+  final_tree_visit:
+    id: 'final_tree_visit'
+    type: 'scene'
+    background: 'ancient_tree'
+    text: 'You return to the Heart Tree one last time. Its blue glow seems to intensify as you approach, as if recognizing you.'
+    characterId: 'narrator'
+    nextNode: 'final_tree_moment'
+    metadata:
+      transition: { type: 'fade', duration: 1.2 }
+      effect: 'glow'
+      audio: 'mystery_theme'
+
+  final_tree_moment:
+    id: 'final_tree_moment'
+    type: 'dialogue'
+    text: 'As you place your hand on the tree once more, you feel a deep sense of peace and connection. The forest has shared its secrets with you.'
+    characterId: 'narrator'
+    nextNode: 'guide_final_words'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 18
+
+  guide_final_words:
+    id: 'guide_final_words'
+    type: 'dialogue'
+    text: 'The Heart Tree has truly accepted you. Few visitors receive such a welcome. Whenever you wish to return, the path will be open to you.'
+    characterId: 'guide'
+    nextNode: 'guide_leads_out'
+    metadata:
+      emotion: 'excited'
+      textSpeed: 25
+
+  final_tree_visit_solo:
+    id: 'final_tree_visit_solo'
+    type: 'scene'
+    background: 'ancient_tree'
+    text: "You make your way back to the ancient tree. As you approach, its glow brightens, almost as if it's happy to see you again."
+    characterId: 'narrator'
+    nextNode: 'final_tree_communion'
+    metadata:
+      transition: 'fade'
+      effect: 'glow'
+      audio: 'mystery_theme'
+
+  final_tree_communion:
+    id: 'final_tree_communion'
+    type: 'dialogue'
+    text: 'You place your hand on the bark one last time and feel a warm current of energy pass between you and the tree - a final farewell and blessing.'
+    characterId: 'narrator'
+    nextNode: 'exit_after_tree'
+    metadata:
+      textEffect: 'glow'
+      textSpeed: 20
+
+  exit_after_tree:
+    id: 'exit_after_tree'
+    type: 'dialogue'
+    text: "With the tree's final blessing, you find the path out of the forest appears clearly before you, guiding you safely back to where your journey began."
+    characterId: 'narrator'
+    nextNode: 'solo_exit_reflection'
+    metadata:
+      textSpeed: 22
+      animationOut: 'fadeOut'
+
+  ending_turned_back:
+    id: 'ending_turned_back'
+    type: 'dialogue'
+    text: "You return to the world beyond the forest, your curiosity still unsatisfied. Perhaps one day you'll return better prepared for the mysteries within."
+    characterId: 'narrator'
+    nextNode: 'ending_credits'
+    metadata:
+      textSpeed: 20
+      animationIn: 'fadeIn'
+
+  ending_credits:
+    id: 'ending_credits'
+    type: 'scene'
+    background: 'forest_entrance'
+    text: "THE END\n\nThank you for experiencing 'The Forest's Secret'. Your choices shaped a unique journey through the ancient woods."
+    characterId: 'narrator'
+    nextNode: 'replay_option'
+    metadata:
+      transition: { type: 'fade', duration: 2.0 }
+      audio: 'victory_theme'
+      textSpeed: 15
+      textEffect: 'wave'
+
+  replay_option:
+    id: 'replay_option'
+    type: 'choice'
+    text: 'Would you like to experience the story again?'
+    choices:
+      - text: 'Start a new adventure'
+        nextNode: 'intro'
+
+      - text: 'Exit'
+        nextNode: 'exit_game'
+    metadata:
+      choiceAnimation: 'stagger'
+
+  exit_game:
+    id: 'exit_game'
+    type: 'dialogue'
+    text: 'Thank you for playing! We hope you enjoyed your adventure in the ancient forest.'
+    characterId: 'narrator'
+    isEndNode: true
+    metadata:
+      textSpeed: 20
+      animationIn: 'fadeIn'
+      animationOut: 'fadeOut'

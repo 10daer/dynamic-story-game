@@ -1,0 +1,38 @@
+{
+  "name": "dynamic-story-game",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/howler": "^2.2.12",
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-typescript": "^0.14.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "vite-plugin-eslint": "^1.8.1"
+  },
+  "dependencies": {
+    "gsap": "^3.12.7",
+    "howler": "^2.2.4",
+    "pixi.js": "^7.4.3",
+    "yaml": "^2.7.1"
+  }
+}
