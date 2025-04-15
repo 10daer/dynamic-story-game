@@ -77,8 +77,6 @@ export class AssetManager extends EventEmitter {
         }
       }
 
-      console.log('Successfully loaded all image assets');
-
       // Audio loading with existence checking
       const audioAssetExists = async (url: string, expectedType: string): Promise<boolean> => {
         try {
@@ -96,11 +94,11 @@ export class AssetManager extends EventEmitter {
 
       await Promise.all(
         audioAssets.map(async (asset) => {
-          // const exists = await audioAssetExists(asset.url, 'audio/');
-          // if (!exists) {
-          //   console.warn(`Audio not found or invalid type: ${asset.url}`);
-          //   return;
-          // }
+          const exists = await audioAssetExists(asset.url, 'audio/');
+          if (!exists) {
+            console.warn(`Audio not found or invalid type: ${asset.url}`);
+            return;
+          }
 
           return new Promise<void>((resolve, reject) => {
             const sound = new Howl({

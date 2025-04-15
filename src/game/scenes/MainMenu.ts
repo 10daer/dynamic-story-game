@@ -47,8 +47,6 @@ export class MainMenuScene extends Scene {
       const lastScene = this.game.getLastActiveScene();
 
       if (lastScene) {
-        console.log('Continue button clicked - resuming story');
-
         // Resume the game
         this.game.continue();
 
@@ -57,8 +55,6 @@ export class MainMenuScene extends Scene {
           console.error('Error switching to story scene:', error);
         });
       } else {
-        console.log('Start button clicked - starting new story');
-
         // Start the story
         this.game.getStoryManager().start();
 
@@ -209,7 +205,6 @@ export class MainMenuScene extends Scene {
     }
 
     // In a real implementation, you'd show a UI with save files
-    console.log('Available saves:', saves);
     alert('Check console for available saves');
   }
 

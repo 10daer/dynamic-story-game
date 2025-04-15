@@ -14,7 +14,10 @@ export enum CharacterEmotion {
   SURPRISED = 'surprised',
   THOUGHTFUL = 'thoughtful',
   WORRIED = 'worried',
-  EXCITED = 'excited'
+  EXCITED = 'excited',
+  DETERMINED = 'determined',
+  POWERFUL = 'powerful',
+  ETHEREAL = 'ethereal'
 }
 
 export enum CharacterAnimation {

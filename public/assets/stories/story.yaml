@@ -28,6 +28,7 @@ assets:
     char_player_determined: 'assets/images/characters/player/determined.png'
     char_spirit_ethereal: 'assets/images/characters/spirit/ethereal.png'
     char_spirit_powerful: 'assets/images/characters/spirit/powerful.png'
+    char_narrator: 'assets/images/characters/narrator.png'
 
   audio:
     forest_ambience: 'assets/audio/ambience/forest.mp3'

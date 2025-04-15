@@ -424,9 +424,7 @@ export class StateManager extends EventEmitter {
 
     this.autoSaveTimer = window.setInterval(() => {
       if (this.autoSaveEnabled) {
-        this.saveGame('autosave')
-          .then(() => console.log('Auto-save complete'))
-          .catch((err) => console.error('Auto-save failed:', err));
+        this.saveGame('autosave').catch((err) => console.error('Auto-save failed:', err));
       }
     }, this.autoSaveInterval);
   }

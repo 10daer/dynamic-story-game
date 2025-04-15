@@ -12,10 +12,6 @@ export class FadeTransition {
   }
 
   async execute(game: Game, currentScene: Scene | null, nextScene: Scene): Promise<void> {
-    console.log(
-      `Starting fade transition from ${currentScene?.constructor.name} to ${nextScene.constructor.name}`
-    );
-
     return new Promise<void>((resolve, reject) => {
       try {
         // Create overlay for transition
@@ -93,7 +89,6 @@ export class FadeTransition {
                       // Clean up transition
                       game.getStage().removeChild(transitionContainer);
                       transitionContainer.destroy({ children: true });
-                      console.log('Fade transition completed successfully');
                       resolve();
                     }
                   }

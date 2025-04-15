@@ -123,8 +123,6 @@ export class StoryManager extends EventEmitter {
     }
   }
 
-  // Add these methods to the StoryManager class
-
   /**
    * Get the current node ID
    */

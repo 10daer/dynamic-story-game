@@ -4,7 +4,9 @@ import { StoryAnimator } from '../../core/animations/StoryAnimator';
 import { EventEmitter } from '../../core/events/EventEmitter';
 import { StoryManager } from '../../core/story/StoryManager';
 import { StoryNode } from '../../core/story/StoryNode';
+import { CharacterActionGenerator } from '../characters/CharacterActionGenerator';
 import { Game } from '../Game';
+import { Scene } from '../scenes/Scene';
 import { ChoiceSystem } from './ChoiceSystem';
 import { DialogueBox, DialogueDisplayOptions } from './DialogueBox';
 
@@ -26,6 +28,8 @@ export class DialogueManager extends EventEmitter {
   private choiceSystem: ChoiceSystem;
   private animator: StoryAnimator;
 
+  private characterActionGenerator: CharacterActionGenerator;
+
   private isDialogueActive: boolean = false;
   private characters: Record<string, CharacterDefinition> = {};
   private defaultAnimationIn: string = 'fadeIn';
@@ -37,6 +41,7 @@ export class DialogueManager extends EventEmitter {
 
     this.game = game;
     this.storyManager = storyManager;
+    this.characterActionGenerator = new CharacterActionGenerator();
     this.animator = animator || new StoryAnimator(game);
 
     // Create dialogue box with animator
@@ -55,6 +60,13 @@ export class DialogueManager extends EventEmitter {
   private setupEventListeners(): void {
     // Listen for story events
     this.storyManager.on('node:enter', this.handleNodeEnter.bind(this));
+    this.storyManager.on('story:start', () => {
+      // Handle story start - make sure first node is processed
+      const startNode = this.storyManager.getCurrentNode();
+      if (startNode) {
+        this.handleNodeEnter(startNode);
+      }
+    });
 
     // Listen for dialogue events
     this.dialogueBox.on('dialogue:continue', this.handleDialogueContinue.bind(this));
@@ -70,6 +82,48 @@ export class DialogueManager extends EventEmitter {
   private handleNodeEnter(node: StoryNode): void {
     // Get node metadata (if any)
     const metadata = node.getMetadata() || {};
+    const characterId = node.getCharacterId() || 'narrator';
+
+    // Generate character actions from the node
+    if (this.game.characterManager) {
+      // Get all available characters from character manager
+      const characters = this.game.characterManager.getAllCharacters();
+
+      // Generate actions for this node
+      const characterActions = this.characterActionGenerator.generateActionsFromNode(
+        node,
+        characters
+      );
+
+      // Execute the generated actions
+      if (characterActions.length > 0) {
+        this.game.characterManager.executeActionSequence(characterActions);
+      }
+
+      // If we're using contextual actions between nodes, we could potentially
+      // look ahead to the next node in the story and generate transition actions
+      const nextNode = this.storyManager.getNode(node.getNextNodeId() as string); // You would need to implement this method
+      if (nextNode) {
+        const contextualActions = this.characterActionGenerator.generateContextualActions(
+          node,
+          nextNode,
+          characters
+        );
+
+        if (contextualActions.length > 0) {
+          this.game.characterManager.executeActionSequence(contextualActions);
+        }
+      }
+
+      // Ensure character exists if needed (your existing code)
+      if (characterId) {
+        const character = this.game.characterManager.getCharacter(characterId);
+        if (!character) {
+          // Create character if it doesn't exist yet
+          this.game.characterManager.createCharacter(characterId);
+        }
+      }
+    }
 
     // Handle node based on type
     switch (node.getType()) {
@@ -100,6 +154,11 @@ export class DialogueManager extends EventEmitter {
           // Just show dialogue if no transition
           this.showDialogue(node);
         }
+        // Handle background change if present
+        if (node.getBackground()) {
+          // Tell the SceneManager to change the background
+          this.game.sceneManager.changeBackground(node.getBackground() as string);
+        }
         break;
 
       case 'end':
@@ -129,7 +188,6 @@ export class DialogueManager extends EventEmitter {
       transitionType = transition.type || 'fade';
     }
 
-    // Get current node and find scene ID
     const currentNode = this.storyManager.getCurrentNode();
     if (!currentNode) return;
 
@@ -139,15 +197,17 @@ export class DialogueManager extends EventEmitter {
       return;
     }
 
-    // Use SceneManager for transition
     const sceneManager = this.game.sceneManager;
 
-    // Listen for the scene changed event
+    // Scene change handler
     const onSceneChanged = () => {
       sceneManager.off('scene:changed', onSceneChanged);
+
+      // Call completion callback
       if (onComplete) onComplete();
     };
 
+    // Listen to scene:changed with extended logic
     sceneManager.on('scene:changed', onSceneChanged);
 
     // Perform the transition

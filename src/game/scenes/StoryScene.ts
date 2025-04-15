@@ -46,11 +46,136 @@ export class StoryScene extends Scene {
     this.container.addChild(this.menuButton);
   }
 
+  /**
+   * Setup character display on scene
+   */
+  private setupCharacterDisplay(): void {
+    // Create positions for characters
+    const leftPos = { x: window.innerWidth * 0.25, y: window.innerHeight * 0.75 };
+    const centerPos = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.75 };
+    const rightPos = { x: window.innerWidth * 0.75, y: window.innerHeight * 0.75 };
+
+    // Store positions
+    this.characterPositions = {
+      left: leftPos,
+      center: centerPos,
+      right: rightPos,
+      'off-screen-left': { x: -200, y: window.innerHeight * 0.75 },
+      'off-screen-right': { x: window.innerWidth + 200, y: window.innerHeight * 0.75 }
+    };
+  }
+
+  // Add property to store character positions
+  private characterPositions: { [key: string]: { x: number; y: number } } = {};
+
+  // Update handleCharacterShow method
+  private handleCharacterShow(characterId: string): void {
+    const character = this.game.characterManager.getCharacter(characterId);
+    if (!character) return;
+
+    const sprite = character.getContainer();
+    if (!sprite) return;
+
+    // Add to characters container if not already there
+    if (!this.charactersContainer.children.includes(sprite)) {
+      this.charactersContainer.addChild(sprite);
+    }
+
+    // Get position based on character state
+    const state = this.game.characterStateManager.getCharacterState(characterId);
+    if (state) {
+      // Use the position from character positions map
+      const posName = state.position.toLowerCase();
+      const pos = this.characterPositions[posName] || this.characterPositions['center'];
+
+      // Set position
+      sprite.position.set(pos.x, pos.y);
+
+      // Make sure character is centered properly
+      (sprite as PIXI.Sprite).anchor.set(0.5, 1); // Center horizontally, bottom aligned
+    }
+
+    // Animate appearance based on position
+    sprite.alpha = 0;
+    sprite.scale.set(0.9);
+
+    // Different animation based on position
+    if (state && state.position === 'offScreenLeft') {
+      // Move from left to position
+      sprite.x -= 200;
+      gsap.to(sprite, {
+        x: sprite.x + 200,
+        alpha: 1,
+        scale: 1,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+    } else if (state && state.position === 'offScreenRight') {
+      // Move from right to position
+      sprite.x += 200;
+      gsap.to(sprite, {
+        x: sprite.x - 200,
+        alpha: 1,
+        scale: 1,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+    } else {
+      // Fade in at position
+      gsap.to(sprite, {
+        alpha: 1,
+        scale: 1,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+    }
+
+    // Update character state to visible
+    if (state) {
+      state.isVisible = true;
+      this.game.characterStateManager.updateCharacterState(characterId, state);
+    }
+  }
+
+  // Update resizeElements method to use the character positions map
+  private resizeElements(width: number, height: number): void {
+    // Resize background
+    this.background.width = width;
+    this.background.height = height;
+
+    // Update character positions map
+    this.characterPositions = {
+      left: { x: width * 0.25, y: height * 0.75 },
+      center: { x: width * 0.5, y: height * 0.75 },
+      right: { x: width * 0.75, y: height * 0.75 },
+      'off-screen-left': { x: -200, y: height * 0.75 },
+      'off-screen-right': { x: width + 200, y: height * 0.75 }
+    };
+
+    // Reposition characters based on their positions
+    this.game.characterManager.getAllCharacters().forEach((character) => {
+      if (!character) return;
+
+      const sprite = character.getContainer();
+      if (!sprite || !this.charactersContainer.children.includes(sprite)) return;
+
+      const state = character.getState();
+      if (state) {
+        // Get position from the map
+        const posName = state.position.toLowerCase();
+        const pos = this.characterPositions[posName] || this.characterPositions['center'];
+
+        // Set position
+        sprite.position.set(pos.x, pos.y);
+      }
+    });
+  }
+
   public async init(): Promise<void> {
     // Setup event handlers
     this.setupEventHandlers();
 
-    // Setup menu button handler - UPDATED for pause functionality
+    // Setup menu button handler
     this.menuButton.eventMode = 'static';
     this.menuButton.on('pointerdown', () => {
       // Store the current scene for later resuming
@@ -65,6 +190,22 @@ export class StoryScene extends Scene {
 
     // Position elements based on current screen size
     this.resizeElements(window.innerWidth, window.innerHeight);
+
+    // Ensure the dialogue boxes are added to this scene's container
+    // This is important to make sure dialogs appear on top of the background
+    const dialogueBox = this.game.dialogueManager.getDialogueBox();
+    const choiceSystem = this.game.dialogueManager.getChoiceSystem();
+
+    if (dialogueBox && dialogueBox.getContainer().parent !== this.container) {
+      this.container.addChild(dialogueBox.getContainer());
+    }
+
+    if (choiceSystem && choiceSystem.getContainer().parent !== this.container) {
+      this.container.addChild(choiceSystem.getContainer());
+    }
+
+    // Setup character display positions
+    this.setupCharacterDisplay();
 
     return Promise.resolve();
   }
@@ -97,40 +238,6 @@ export class StoryScene extends Scene {
 
   public update(deltaTime: number, elapsedTime: number): void {
     super.update(deltaTime, elapsedTime);
-  }
-
-  private handleCharacterShow(characterId: string): void {
-    const character = this.game.characterManager.getCharacter(characterId);
-    if (!character) return;
-
-    const sprite = character.getContainer();
-    if (!sprite) return;
-
-    // Add to characters container if not already there
-    if (!this.charactersContainer.children.includes(sprite)) {
-      this.charactersContainer.addChild(sprite);
-    }
-
-    // Get position based on character state
-    const state = this.game.characterStateManager.getCharacterState(characterId);
-    if (state) {
-      switch (state.position) {
-        case 'left':
-          sprite.position.set(window.innerWidth * 0.25, window.innerHeight * 0.5);
-          break;
-        case 'center':
-          sprite.position.set(window.innerWidth * 0.5, window.innerHeight * 0.5);
-          break;
-        case 'right':
-          sprite.position.set(window.innerWidth * 0.75, window.innerHeight * 0.5);
-          break;
-      }
-    }
-
-    // Animate appearance
-    sprite.alpha = 0;
-    sprite.scale.set(0.9);
-    gsap.to(sprite, { alpha: 1, scale: 1, duration: 0.5 });
   }
 
   private handleCharacterHide(characterId: string): void {
@@ -181,35 +288,6 @@ export class StoryScene extends Scene {
       onComplete: () => {
         this.container.removeChild(this.background);
         this.background = newBackground;
-      }
-    });
-  }
-
-  private resizeElements(width: number, height: number): void {
-    // Resize background
-    this.background.width = width;
-    this.background.height = height;
-
-    // Reposition characters based on their positions
-    this.game.characterManager.getAllCharacters().forEach((character) => {
-      if (!character) return;
-
-      const sprite = character.getContainer();
-      if (!sprite || !this.charactersContainer.children.includes(sprite)) return;
-
-      const state = character.getState();
-      if (state) {
-        switch (state.position) {
-          case 'left':
-            sprite.position.set(width * 0.25, height * 0.5);
-            break;
-          case 'center':
-            sprite.position.set(width * 0.5, height * 0.5);
-            break;
-          case 'right':
-            sprite.position.set(width * 0.75, height * 0.5);
-            break;
-        }
       }
     });
   }

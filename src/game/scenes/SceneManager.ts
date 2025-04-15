@@ -44,6 +44,19 @@ export class SceneManager extends EventEmitter {
     this.transitions.set('slideDown', (currentScene, nextScene) =>
       slideDownTransition.execute(this.game, currentScene, nextScene)
     );
+    this.on('scene:changed', (_: Scene, newScene: Scene) => {
+      // Handle character visibility for StoryScene
+      if (newScene && newScene.constructor.name === 'StoryScene') {
+        const activeCharacters = this.game.characterManager.getAllCharacters();
+
+        for (const [characterId, _] of activeCharacters) {
+          const character = this.game.characterManager.getCharacter(characterId);
+          if (character && character.getState().isVisible) {
+            this.emit('character:show', characterId);
+          }
+        }
+      }
+    });
   }
 
   /**
@@ -185,6 +198,25 @@ export class SceneManager extends EventEmitter {
    */
   public getCurrentScene(): Scene | null {
     return this.currentScene;
+  }
+
+  // Add this method to your SceneManager class in SceneManager.ts
+  /**
+   * Change background for the current scene
+   * @param backgroundId The ID of the background to display
+   */
+  public changeBackground(backgroundId: string): void {
+    // Get the current scene
+    const currentScene = this.getCurrentScene();
+
+    // If there's no current scene, log a warning and return
+    if (!currentScene) {
+      console.warn('No active scene to change background for');
+      return;
+    }
+
+    // Emit the background change event for the scene to handle
+    this.game.emit('background:change', backgroundId);
   }
 
   /**

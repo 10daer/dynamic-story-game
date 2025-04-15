@@ -1,5 +1,3 @@
-// src/core/characters/CharacterManager.ts
-
 import * as PIXI from 'pixi.js';
 import { AssetManager } from '../../core/assets/Assetmanager';
 import { EventEmitter } from '../../core/events/EventEmitter';

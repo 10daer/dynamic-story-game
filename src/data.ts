@@ -78,32 +78,37 @@ const assetsToLoad: AssetItem[] = [
 
   {
     key: 'char_alex_neutral',
-    url: 'assets/characters/alex/neutral.png',
+    url: 'assets/images/characters/alex/neutral.png',
     type: 'image'
   },
   {
     key: 'char_alex_happy',
-    url: 'assets/characters/alex/happy.png',
+    url: 'assets/images/characters/alex/happy.png',
     type: 'image'
   },
   {
     key: 'char_alex_sad',
-    url: 'assets/characters/alex/sad.png',
+    url: 'assets/images/characters/alex/sad.png',
     type: 'image'
   },
   {
     key: 'char_maya_neutral',
-    url: 'assets/characters/maya/neutral.png',
+    url: 'assets/images/characters/maya/neutral.png',
     type: 'image'
   },
   {
     key: 'char_maya_happy',
-    url: 'assets/characters/maya/happy.png',
+    url: 'assets/images/characters/maya/happy.png',
     type: 'image'
   },
   {
     key: 'char_maya_thoughtful',
-    url: 'assets/characters/maya/thoughtful.png',
+    url: 'assets/images/characters/maya/thoughtful.png',
+    type: 'image'
+  },
+  {
+    key: 'char_narrator',
+    url: 'assets/images/characters/narrator.png',
     type: 'image'
   },
 

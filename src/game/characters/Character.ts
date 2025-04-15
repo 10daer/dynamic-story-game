@@ -1,5 +1,3 @@
-// src/core/characters/Character.ts
-
 import { gsap } from 'gsap';
 import * as PIXI from 'pixi.js';
 import { EventEmitter } from '../../core/events/EventEmitter';
