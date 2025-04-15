@@ -66,28 +66,82 @@ export class SceneManager extends EventEmitter {
    * @param transitionKey Optional transition key
    */
   public async switchTo(key: string, transitionKey: string = 'default'): Promise<void> {
-    if (!this.scenes.has(key)) {
-      throw new Error(`Scene with key "${key}" does not exist`);
+    try {
+      if (!this.scenes.has(key)) {
+        throw new Error(`Scene with key "${key}" does not exist`);
+      }
+
+      // Get the next scene
+      const nextScene = this.scenes.get(key)!;
+
+      // // Make sure to properly exit ALL other scenes
+      // for (const [sceneKey, scene] of this.scenes.entries()) {
+      //   if (sceneKey !== key && scene.isActiveScene()) {
+      //     await scene.exit();
+      //   }
+      // }
+
+      // Initialize the scene if needed - BEFORE any transitions start
+      if (!nextScene.isActiveScene()) {
+        await nextScene.init();
+      }
+
+      // Check if we're trying to switch to the same scene
+      if (this.currentScene === nextScene) {
+        console.warn(`Already in scene "${key}", ignoring redundant switchTo`);
+        return;
+      }
+
+      // Get transition function
+      const transition = this.transitions.get(transitionKey) || this.transitions.get('default')!;
+
+      // Emit before change event
+      this.emit('scene:before-change', this.currentScene, nextScene);
+
+      try {
+        // Perform transition - await the result to handle any errors
+        await transition(this.currentScene, nextScene);
+
+        // Store previous scene reference
+        const previousScene = this.currentScene;
+
+        // Update current scene reference
+        this.currentScene = nextScene;
+
+        // Ensure previous scene is properly removed from stage if it exists
+        if (previousScene && previousScene !== nextScene) {
+          // Remove from stage if it's still there
+          if (previousScene.getContainer().parent) {
+            previousScene.getContainer().parent.removeChild(previousScene.getContainer());
+          }
+        }
+
+        // Emit changed event
+        this.emit('scene:changed', previousScene, this.currentScene);
+      } catch (transitionError) {
+        console.error('Scene transition failed:', transitionError);
+
+        // Fallback to default transition in case of failure
+        if (transitionKey !== 'default') {
+          console.warn('Attempting fallback to default transition');
+          await this.transitions.get('default')!(this.currentScene, nextScene);
+          this.currentScene = nextScene;
+          this.emit('scene:changed', this.currentScene, nextScene);
+        } else {
+          // If even the default transition fails, force the scene change
+          if (this.currentScene && this.currentScene.getContainer().parent) {
+            this.currentScene.getContainer().parent.removeChild(this.currentScene.getContainer());
+          }
+          this.currentScene = nextScene;
+          await nextScene.enter();
+          this.game.getStage().addChild(nextScene.getContainer());
+          this.emit('scene:changed', this.currentScene, nextScene);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to switch scene:', error);
+      throw error; // Re-throw to maintain promise rejection chain
     }
-
-    const nextScene = this.scenes.get(key)!;
-
-    // Initialize the scene if needed
-    if (!nextScene.isActiveScene()) {
-      await nextScene.init();
-    }
-
-    // Get transition function
-    const transition = this.transitions.get(transitionKey) || this.transitions.get('default')!;
-
-    // Perform transition
-    this.emit('scene:before-change', this.currentScene, nextScene);
-    await transition(this.currentScene, nextScene);
-
-    const previousScene = this.currentScene;
-    this.currentScene = nextScene;
-
-    this.emit('scene:changed', previousScene, this.currentScene);
   }
 
   /**

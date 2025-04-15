@@ -35,9 +35,14 @@ export class AssetManager extends EventEmitter {
 
   /**
    * Load all queued assets
+   * @param assetsToLoad Array of assets to load
+   * @param useLoadingManager Whether to use the loading manager (default: true)
    * @returns Promise that resolves when all assets are loaded
    */
-  public async loadAll(assetsToLoad: AssetItem[]): Promise<void> {
+  public async loadAll(
+    assetsToLoad: AssetItem[],
+    useLoadingManager: boolean = true
+  ): Promise<void> {
     if (this.isLoading) {
       console.warn('Assets are already loading');
       return;
@@ -53,7 +58,7 @@ export class AssetManager extends EventEmitter {
 
       const updateProgress = () => {
         loadedCount += 1;
-        this.loadingProgress = (loadedCount / totalAssets) * 100;
+        this.loadingProgress = loadedCount / totalAssets;
         this.emit('loading:progress', this.loadingProgress);
       };
 
@@ -90,10 +95,9 @@ export class AssetManager extends EventEmitter {
         updateProgress();
       }
 
-      console.log('successfully load all image assets');
+      console.log('Successfully loaded all image assets');
 
-      // Audio loading
-      // Check if asset exists and matches expected MIME type
+      // Audio loading with existence checking
       const audioAssetExists = async (url: string, expectedType: string): Promise<boolean> => {
         try {
           const res = await fetch(url, { method: 'HEAD' });
@@ -110,18 +114,19 @@ export class AssetManager extends EventEmitter {
 
       await Promise.all(
         audioAssets.map(async (asset) => {
-          const exists = await audioAssetExists(asset.url, 'audio/');
-          if (!exists) {
-            console.warn(`Audio not found or invalid type: ${asset.url}`);
-            updateProgress();
-            return;
-          }
+          // const exists = await audioAssetExists(asset.url, 'audio/');
+          // if (!exists) {
+          //   console.warn(`Audio not found or invalid type: ${asset.url}`);
+          //   updateProgress();
+          //   return;
+          // }
 
           return new Promise<void>((resolve, reject) => {
             const sound = new Howl({
               src: [asset.url],
-              format: ['mp3', 'ogg', 'wav'], // add formats you expect
-              html5: true, // enable HTML5 Audio to support large files or streaming
+              format: ['mp3', 'ogg', 'wav'],
+              html5: true,
+              pool: 5,
               onload: () => {
                 this.assets.set(asset.key, sound);
                 updateProgress();
@@ -129,15 +134,15 @@ export class AssetManager extends EventEmitter {
               },
               onloaderror: (_, err) => {
                 console.error(`Failed to load audio: ${asset.key}`, err);
-                updateProgress(); // Still update progress to avoid blocking UI
-                reject(); // Resolve to prevent Promise.all from rejecting
+                updateProgress();
+                reject();
               }
             });
           });
         })
       );
 
-      this.loadingProgress = 100;
+      this.loadingProgress = 1; // Set to 100%
       this.isLoading = false;
       this.emit('loading:complete', this.assets);
     } catch (error) {
@@ -145,6 +150,43 @@ export class AssetManager extends EventEmitter {
       this.emit('loading:error', error);
       throw error;
     }
+  }
+
+  /**
+   * Load assets using the LoadingManager
+   * @param assetsToLoad Array of assets to load
+   * @param loadingOptions Optional loading options
+   * @returns Promise that resolves when all assets are loaded
+   */
+  public async loadWithManager(
+    game: any, // Game instance
+    assetsToLoad: AssetItem[],
+    loadingOptions: any = {}
+  ): Promise<void> {
+    if (!game.loadingManager) {
+      console.warn('LoadingManager not available, falling back to standard loading');
+      return this.loadAll(assetsToLoad, false);
+    }
+
+    const defaultOptions = {
+      title: 'Loading Assets...',
+      showProgressBar: true,
+      switchToSceneAfter: '',
+      minLoadTime: 500
+    };
+
+    const options = { ...defaultOptions, ...loadingOptions };
+
+    // Create a load function for the loading manager
+    const loadAssets = async () => {
+      return this.loadAll(assetsToLoad, false);
+    };
+
+    // Queue the loading operation
+    game.loadingManager.queue('assets', loadAssets);
+
+    // Start loading
+    await game.loadingManager.startLoading(options);
   }
 
   /**

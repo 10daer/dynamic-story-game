@@ -38,7 +38,15 @@ export class MainMenuScene extends Scene {
     // Add button event listeners
     this.startButton.eventMode = 'static';
     this.startButton.on('pointerdown', () => {
-      this.game.sceneManager.switchTo('story', 'fade');
+      console.log('Start button clicked - starting story and switching to story scene');
+
+      // Start the story
+      this.game.getStoryManager().start();
+
+      // Switch to the story scene
+      this.game.sceneManager.switchTo('story', 'fade').catch((error) => {
+        console.error('Error switching to story scene:', error);
+      });
     });
 
     this.loadButton.eventMode = 'static';
@@ -62,34 +70,70 @@ export class MainMenuScene extends Scene {
   public async enter(): Promise<void> {
     await super.enter();
 
-    // Animate in
+    // Make sure elements exist and are properly positioned before animation
+    this.resizeElements(window.innerWidth, window.innerHeight);
+
+    // Reset properties to initial state before animating
     this.title.alpha = 0;
     this.title.y = 80;
     this.startButton.alpha = 0;
     this.loadButton.alpha = 0;
     this.creditsButton.alpha = 0;
 
-    gsap.to(this.title, { alpha: 1, y: this.title.y + 20, duration: 0.5 });
-    gsap.to(this.startButton, { alpha: 1, delay: 0.2, duration: 0.5 });
-    gsap.to(this.loadButton, { alpha: 1, delay: 0.3, duration: 0.5 });
-    gsap.to(this.creditsButton, { alpha: 1, delay: 0.4, duration: 0.5 });
+    // Use AnimationManager instead of direct gsap calls for better tracking
+    this.game.animationManager.animate(
+      'menu-title-in',
+      this.title,
+      { alpha: 1, y: this.title.y + 20 },
+      { duration: 0.5 }
+    );
+
+    this.game.animationManager.animate(
+      'menu-start-in',
+      this.startButton,
+      { alpha: 1 },
+      { duration: 0.5, delay: 0.2 }
+    );
+
+    this.game.animationManager.animate(
+      'menu-load-in',
+      this.loadButton,
+      { alpha: 1 },
+      { duration: 0.5, delay: 0.3 }
+    );
+
+    this.game.animationManager.animate(
+      'menu-credits-in',
+      this.creditsButton,
+      { alpha: 1 },
+      { duration: 0.5, delay: 0.4 }
+    );
 
     return Promise.resolve();
   }
 
   public async exit(): Promise<void> {
-    // Animate out
-    gsap.to(this.container, {
-      alpha: 0,
-      duration: 0.5,
-      onComplete: () => {
-        super.exit();
-        this.container.alpha = 1;
-      }
-    });
+    return new Promise<void>((resolve) => {
+      // Kill any ongoing animations to prevent errors
+      this.game.animationManager.kill('menu-title-in');
+      this.game.animationManager.kill('menu-start-in');
+      this.game.animationManager.kill('menu-load-in');
+      this.game.animationManager.kill('menu-credits-in');
 
-    return new Promise((resolve) => {
-      setTimeout(resolve, 500);
+      // Animate out
+      this.game.animationManager.animate(
+        'menu-fade-out',
+        this.container,
+        { alpha: 0 },
+        {
+          duration: 0.5,
+          onComplete: () => {
+            super.exit();
+            this.container.alpha = 1; // Reset alpha for next time
+            resolve();
+          }
+        }
+      );
     });
   }
 

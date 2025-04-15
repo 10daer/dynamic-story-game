@@ -1,4 +1,4 @@
-import { AssetItem } from './core/assets/Assetmanager';
+import { assetsToLoad } from './data';
 import { CharacterEmotion, CharacterPosition } from './game/characters/CharacterData';
 import { Game } from './game/Game';
 import { LoadingScene } from './game/scenes/LoadingScene';
@@ -30,206 +30,190 @@ async function init(): Promise<void> {
     // Switch to loading scene first
     await game.sceneManager.switchTo('loading');
 
-    // Setup asset loading
-    const assetsToLoad: AssetItem[] = [
-      // 🌄 Backgrounds
-      {
-        key: 'forest_entrance',
-        url: 'assets/images/backgrounds/forest_entrance.jpg',
-        type: 'image'
-      },
-      {
-        key: 'forest_clearing',
-        url: 'assets/images/backgrounds/forest_clearing.jpg',
-        type: 'image'
-      },
-      { key: 'ancient_tree', url: 'assets/images/backgrounds/ancient_tree.jpg', type: 'image' },
-      { key: 'ruined_temple', url: 'assets/images/backgrounds/ruined_temple.jpg', type: 'image' },
-      { key: 'forest_path', url: 'assets/images/backgrounds/forest_path.jpg', type: 'image' },
-      {
-        key: 'magical_crystal',
-        url: 'assets/images/backgrounds/magical_crystal.jpg',
-        type: 'image'
-      },
-      { key: 'forest_exit', url: 'assets/images/backgrounds/forest_exit.jpg', type: 'image' },
-      { key: 'sacred_altar', url: 'assets/images/backgrounds/sacred_altar.jpg', type: 'image' },
-      {
-        key: 'temple_interior',
-        url: 'assets/images/backgrounds/temple_interior.jpg',
-        type: 'image'
-      },
-      { key: 'night_forest', url: 'assets/images/backgrounds/night_forest.jpg', type: 'image' },
+    // Setup loading listeners
+    setupLoadingListeners();
 
-      // 🎭 Characters
-      {
-        key: 'char_guide_neutral',
-        url: 'assets/images/characters/guide/neutral.png',
-        type: 'image'
-      },
-      {
-        key: 'char_guide_smiling',
-        url: 'assets/images/characters/guide/smiling.png',
-        type: 'image'
-      },
-      {
-        key: 'char_guide_concerned',
-        url: 'assets/images/characters/guide/concerned.png',
-        type: 'image'
-      },
-      {
-        key: 'char_guide_mysterious',
-        url: 'assets/images/characters/guide/mysterious.png',
-        type: 'image'
-      },
-      {
-        key: 'char_player_neutral',
-        url: 'assets/images/characters/player/neutral.png',
-        type: 'image'
-      },
-      {
-        key: 'char_player_surprised',
-        url: 'assets/images/characters/player/surprised.png',
-        type: 'image'
-      },
-      {
-        key: 'char_player_determined',
-        url: 'assets/images/characters/player/determined.png',
-        type: 'image'
-      },
-      {
-        key: 'char_spirit_ethereal',
-        url: 'assets/images/characters/spirit/ethereal.png',
-        type: 'image'
-      },
-      {
-        key: 'char_spirit_powerful',
-        url: 'assets/images/characters/spirit/powerful.png',
-        type: 'image'
-      },
-
-      // 🔊 Audio
-      { key: 'forest_ambience', url: 'assets/audio/ambience/forest.mp3', type: 'audio' },
-      { key: 'mystery_theme', url: 'assets/audio/music/mystery_theme.mp3', type: 'audio' },
-      { key: 'magical_discovery', url: 'assets/audio/sfx/magical_discovery.mp3', type: 'audio' },
-      { key: 'danger_theme', url: 'assets/audio/music/danger_theme.mp3', type: 'audio' },
-      { key: 'victory_theme', url: 'assets/audio/music/victory_theme.mp3', type: 'audio' },
-      { key: 'heart_beat', url: 'assets/audio/sfx/heart_beat.mp3', type: 'audio' },
-      { key: 'crystal_hum', url: 'assets/audio/sfx/crystal_hum.mp3', type: 'audio' },
-      { key: 'leaves_rustle', url: 'assets/audio/sfx/leaves_rustle.mp3', type: 'audio' },
-      { key: 'ancient_whispers', url: 'assets/audio/sfx/ancient_whispers.mp3', type: 'audio' },
-      { key: 'tree_communion', url: 'assets/audio/sfx/tree_communion.mp3', type: 'audio' }
-    ];
-
-    // Load assets
-    try {
-      await game.assetManager.loadAll(assetsToLoad);
-      console.log('Assets loaded successfully');
-    } catch (error) {
-      console.warn('Some assets failed to load:', error);
-      alert('Some assets could not be loaded. The game may not display correctly.');
-    }
-
-    // Register characters
-    game.addCharacter('alex', {
-      id: 'alex',
-      name: 'Alex',
-      displayName: 'Alex',
-      description: 'A brave explorer with a curious spirit',
-      defaultEmotion: CharacterEmotion.NEUTRAL,
-      currentEmotion: CharacterEmotion.NEUTRAL,
-      position: CharacterPosition.LEFT,
-      poses: [
-        {
-          id: 'neutral',
-          emotion: CharacterEmotion.NEUTRAL,
-          texturePath: './assets/characters/alex/neutral.png'
-        },
-        {
-          id: 'happy',
-          emotion: CharacterEmotion.HAPPY,
-          texturePath: './assets/characters/alex/happy.png'
-        },
-        {
-          id: 'sad',
-          emotion: CharacterEmotion.SAD,
-          texturePath: './assets/characters/alex/sad.png'
-        }
-      ],
-      isVisible: true,
-      scale: 1.0,
-      speechColor: 0x4e7bff,
-      speechFont: 'Arial',
-      customState: {
-        bravery: 5,
-        intelligence: 4,
-        relationship_maya: 0
-      }
-    });
-
-    game.addCharacter('maya', {
-      id: 'maya',
-      name: 'Maya',
-      displayName: 'Maya',
-      description: 'A wise guide with ancient knowledge',
-      defaultEmotion: CharacterEmotion.NEUTRAL,
-      currentEmotion: CharacterEmotion.NEUTRAL,
-      position: CharacterPosition.RIGHT,
-      poses: [
-        {
-          id: 'neutral',
-          emotion: CharacterEmotion.NEUTRAL,
-          texturePath: './assets/characters/maya/neutral.png'
-        },
-        {
-          id: 'happy',
-          emotion: CharacterEmotion.HAPPY,
-          texturePath: './assets/characters/maya/happy.png'
-        },
-        {
-          id: 'thoughtful',
-          emotion: CharacterEmotion.THOUGHTFUL,
-          texturePath: './assets/characters/maya/thoughtful.png'
-        }
-      ],
-      scale: 1.0,
-      speechColor: 0x8a2be2,
-      speechFont: 'Arial',
-      customState: {
-        wisdom: 8,
-        patience: 7,
-        relationship_alex: 0
-      },
-      isVisible: true
-    });
-
-    // Initialize scenes
-    await loadingScene.init();
-    await menuScene.init();
-    await storyScene.init();
-
-    // Load a sample story from file (this will need to be created)
-    try {
-      // This assumes you have a story file available
-      await game.loadStory('assets/stories/story.yaml', 'yaml');
-      console.log('Story loaded successfully');
-    } catch (error) {
-      console.error('Failed to load story:', error);
-      alert('Could not load the story. Please try again later.');
-    }
-
-    // Setup event listeners
+    // Setup other event listeners
     setupEventListeners();
 
-    // Switch to main menu after loading is complete
-    await game.sceneManager.switchTo('mainMenu', 'fade');
+    // Queue all loading operations through the loading manager
+    queueAllLoadingOperations();
 
-    // Start the game
-    game.start();
-    console.log('Game started successfully');
+    // Start the loading process with the loading manager
+    await game.loadingManager.startLoading({
+      title: 'Loading Game...',
+      showProgressBar: true,
+      switchToSceneAfter: 'mainMenu',
+      transitionEffect: 'fade',
+      minLoadTime: 1500 // Ensure loading screen shows for at least 1.5 seconds
+    });
   } catch (error) {
     console.error('Game initialization failed:', error);
     alert('Failed to initialize the game. Please refresh the page.');
   }
+}
+
+// Queue all loading operations
+function queueAllLoadingOperations(): void {
+  // 1. Queue asset loading
+  game.loadingManager.queue('assets', async () => {
+    try {
+      await game.assetManager.loadAll(assetsToLoad, false);
+      console.log('Assets loaded successfully');
+    } catch (error) {
+      console.warn('Some assets failed to load:', error);
+      throw error;
+    }
+  });
+
+  // 2. Queue scene initialization
+  game.loadingManager.queue('scenes', async () => {
+    try {
+      const loadingScene = game.sceneManager.getScene('loading') as LoadingScene;
+      const menuScene = game.sceneManager.getScene('mainMenu') as MainMenuScene;
+      const storyScene = game.sceneManager.getScene('story') as StoryScene;
+
+      await loadingScene.init();
+      await menuScene.init();
+      await storyScene.init();
+      console.log('Scenes initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize scenes:', error);
+      throw error;
+    }
+  });
+
+  // 3. Queue story loading
+  game.loadingManager.queue('story', async () => {
+    try {
+      const storyData = await game.assetManager.loadText('assets/stories/story.yaml');
+      game.getStoryManager().loadFromYaml(storyData);
+      console.log('Story loaded successfully');
+    } catch (error) {
+      console.error('Failed to load story:', error);
+      throw error;
+    }
+  });
+
+  // 4. Queue character creation
+  game.loadingManager.queue('characters', async () => {
+    try {
+      await createCharacters();
+      console.log('Characters created successfully');
+    } catch (error) {
+      console.error('Failed to create characters:', error);
+      throw error;
+    }
+  });
+}
+
+// Create all game characters
+async function createCharacters(): Promise<void> {
+  // Register Alex character
+  game.addCharacter('alex', {
+    id: 'alex',
+    name: 'Alex',
+    displayName: 'Alex',
+    description: 'A brave explorer with a curious spirit',
+    defaultEmotion: CharacterEmotion.NEUTRAL,
+    currentEmotion: CharacterEmotion.NEUTRAL,
+    position: CharacterPosition.LEFT,
+    poses: [
+      {
+        id: 'neutral',
+        emotion: CharacterEmotion.NEUTRAL,
+        texturePath: './assets/characters/alex/neutral.png'
+      },
+      {
+        id: 'happy',
+        emotion: CharacterEmotion.HAPPY,
+        texturePath: './assets/characters/alex/happy.png'
+      },
+      {
+        id: 'sad',
+        emotion: CharacterEmotion.SAD,
+        texturePath: './assets/characters/alex/sad.png'
+      }
+    ],
+    isVisible: true,
+    scale: 1.0,
+    speechColor: 0x4e7bff,
+    speechFont: 'Arial',
+    customState: {
+      bravery: 5,
+      intelligence: 4,
+      relationship_maya: 0
+    }
+  });
+
+  // Register Maya character
+  game.addCharacter('maya', {
+    id: 'maya',
+    name: 'Maya',
+    displayName: 'Maya',
+    description: 'A wise guide with ancient knowledge',
+    defaultEmotion: CharacterEmotion.NEUTRAL,
+    currentEmotion: CharacterEmotion.NEUTRAL,
+    position: CharacterPosition.RIGHT,
+    poses: [
+      {
+        id: 'neutral',
+        emotion: CharacterEmotion.NEUTRAL,
+        texturePath: './assets/characters/maya/neutral.png'
+      },
+      {
+        id: 'happy',
+        emotion: CharacterEmotion.HAPPY,
+        texturePath: './assets/characters/maya/happy.png'
+      },
+      {
+        id: 'thoughtful',
+        emotion: CharacterEmotion.THOUGHTFUL,
+        texturePath: './assets/characters/maya/thoughtful.png'
+      }
+    ],
+    scale: 1.0,
+    speechColor: 0x8a2be2,
+    speechFont: 'Arial',
+    customState: {
+      wisdom: 8,
+      patience: 7,
+      relationship_alex: 0
+    },
+    isVisible: true
+  });
+
+  // Wait for character creation to complete
+  // This ensures addCharacter promises resolve before continuing
+  return new Promise<void>((resolve) => {
+    // Give a small delay to ensure character events have fired
+    setTimeout(() => resolve(), 100);
+  });
+}
+
+// Setup loading-specific event listeners
+function setupLoadingListeners(): void {
+  // Listen for loading manager events
+  game.loadingManager.on('loading:start', (options) => {
+    console.log('Loading started:', options);
+  });
+
+  game.loadingManager.on('loading:progress', (progress, itemKey) => {
+    console.log(
+      `Loading progress: ${Math.floor(progress * 100)}%${itemKey ? ` (${itemKey})` : ''}`
+    );
+  });
+
+  game.loadingManager.on('loading:complete', () => {
+    console.log('Loading completed');
+
+    game.start();
+    console.log('Game started successfully');
+  });
+
+  game.loadingManager.on('loading:error', (itemKey, error) => {
+    console.error(`Loading error for ${itemKey}:`, error);
+  });
 }
 
 // Setup game event listeners
@@ -304,16 +288,11 @@ function setupEventListeners(): void {
 }
 
 // Handle window load event
-window.addEventListener('load', () => {
-  init().catch((error) => {
-    console.error('Game initialization error:', error);
-    alert('An error occurred while starting the game. Please refresh the page.');
-  });
-});
+window.addEventListener('load', init);
 
 // Handle window errors
 window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
+  console.error('Global error:', event);
   // Optionally implement a more user-friendly error screen here
 });
 

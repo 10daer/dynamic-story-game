@@ -2,6 +2,12 @@ import * as PIXI from 'pixi.js';
 import { Game } from '../Game';
 import { Scene } from './Scene';
 
+interface LoadingSceneData {
+  title?: string;
+  showProgressBar?: boolean;
+  customData?: Record<string, any>;
+}
+
 export class LoadingScene extends Scene {
   private loadingText: PIXI.Text;
   private progressBar: {
@@ -9,12 +15,19 @@ export class LoadingScene extends Scene {
     fill: PIXI.Graphics;
   };
   private progress: number = 0;
+  private data: LoadingSceneData = {
+    title: 'Loading...',
+    showProgressBar: true,
+    customData: {}
+  };
+  private name: string;
 
   constructor(game: Game) {
     super(game);
+    this.name = 'loading'; // Set scene name for reference
 
     // Create loading text
-    this.loadingText = new PIXI.Text('Loading...', {
+    this.loadingText = new PIXI.Text(this.data.title || 'Loading...', {
       fontFamily: 'Arial',
       fontSize: 24,
       fill: 0xffffff,
@@ -51,8 +64,8 @@ export class LoadingScene extends Scene {
     // Position elements based on current screen size
     this.resizeElements(window.innerWidth, window.innerHeight);
 
-    // Listen for asset loading progress
-    this.game.assetManager.on('progress', (progress: number) => {
+    // Listen for loading manager progress
+    this.game.loadingManager.on('loading:progress', (progress: number) => {
       this.updateProgress(progress);
     });
 
@@ -65,19 +78,45 @@ export class LoadingScene extends Scene {
     // Reset progress bar
     this.updateProgress(0);
 
+    // Update text with current loading title
+    this.loadingText.text = this.data.title || 'Loading...';
+
+    // Show/hide progress bar based on configuration
+    this.progressBar.background.visible = this.data.showProgressBar !== false;
+    this.progressBar.fill.visible = this.data.showProgressBar !== false;
+
     return Promise.resolve();
   }
 
   public async exit(): Promise<void> {
-    // Remove event listeners
-    this.game.assetManager.off('progress');
-
     return super.exit();
   }
 
   public update(deltaTime: number, elapsedTime: number): void {
     super.update(deltaTime, elapsedTime);
     // Add any animations or updates here
+  }
+
+  /**
+   * Set data for the loading scene
+   * @param data Loading scene configuration
+   */
+  public setData(data: LoadingSceneData): void {
+    this.data = { ...this.data, ...data };
+
+    // Update UI if already visible
+    if (this.isActive) {
+      this.loadingText.text = this.data.title || 'Loading...';
+      this.progressBar.background.visible = this.data.showProgressBar !== false;
+      this.progressBar.fill.visible = this.data.showProgressBar !== false;
+    }
+  }
+
+  /**
+   * Get the scene name
+   */
+  public getName(): string {
+    return this.name;
   }
 
   private resizeElements(width: number, height: number): void {
@@ -104,7 +143,7 @@ export class LoadingScene extends Scene {
     this.progressBar.fill.drawRect(0, 0, barWidth * progress, 20);
     this.progressBar.fill.endFill();
 
-    // Update text
-    this.loadingText.text = `Loading... ${Math.floor(progress * 100)}%`;
+    // Update text with percentage
+    this.loadingText.text = `${this.data.title || 'Loading...'} ${Math.floor(progress * 100)}%`;
   }
 }

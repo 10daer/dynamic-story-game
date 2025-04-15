@@ -15,6 +15,7 @@ import {
 import { CharacterManager } from './characters/CharacterManager';
 import { CharacterStateManager } from './characters/CharacterStateManager';
 import { DialogueManager } from './dialogue/DialogueManager';
+import { LoadingManager } from './loading/LoadingManager';
 
 export class Game extends EventEmitter {
   private app: PIXI.Application;
@@ -25,6 +26,7 @@ export class Game extends EventEmitter {
   public assetManager: AssetManager;
   public sceneManager: SceneManager;
   public stateManager: StateManager;
+  public loadingManager: LoadingManager;
   public characterManager: CharacterManager;
   public dialogueManager: DialogueManager;
   private storyManager: StoryManager;
@@ -79,10 +81,13 @@ export class Game extends EventEmitter {
     this.sceneManager = new SceneManager(this);
     this.stateManager = new StateManager();
     this.characterManager = new CharacterManager(this);
+    this.loadingManager = new LoadingManager(this);
     this.characterStateManager = new CharacterStateManager(this.stateManager);
     this.storyAnimator = new StoryAnimator(this);
     this.storyManager = new StoryManager(this.sceneManager, this.storyAnimator);
     this.dialogueManager = new DialogueManager(this, this.storyManager, this.storyAnimator);
+
+    this.connectAssetManagerToLoadingManager();
 
     // Setup resize handler
     window.addEventListener('resize', this.handleResize.bind(this));
@@ -136,6 +141,28 @@ export class Game extends EventEmitter {
 
       // Emit game load event
       this.emit('game:loaded', saveId, saveData);
+    });
+  }
+
+  /**
+   * Connect the AssetManager to LoadingManager for progress tracking
+   */
+  private connectAssetManagerToLoadingManager(): void {
+    // Forward asset loading progress to loading manager
+    this.assetManager.on('loading:start', () => {
+      this.loadingManager.emit('loading:start');
+    });
+
+    this.assetManager.on('loading:progress', (progress: number) => {
+      this.loadingManager.updateProgress(progress);
+    });
+
+    this.assetManager.on('loading:complete', () => {
+      this.loadingManager.emit('loading:complete');
+    });
+
+    this.assetManager.on('loading:error', (error: any) => {
+      this.loadingManager.emit('loading:error', 'assets', error);
     });
   }
 

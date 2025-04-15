@@ -7,90 +7,119 @@ export class FadeTransition {
   private ease: string = 'power2.out';
 
   constructor(duration?: number, ease?: string) {
-    if (duration) this.duration = duration;
-    if (ease) this.ease = ease;
+    if (duration !== undefined) this.duration = duration;
+    if (ease !== undefined) this.ease = ease;
   }
 
   async execute(game: Game, currentScene: Scene | null, nextScene: Scene): Promise<void> {
-    return new Promise<void>((resolve) => {
-      // Create overlay for transition
-      const overlay = new PIXI.Graphics();
-      overlay.beginFill(0x000000);
-      overlay.drawRect(0, 0, game.getApp().renderer.width, game.getApp().renderer.height);
-      overlay.endFill();
-      overlay.alpha = 0;
+    console.log(
+      `Starting fade transition from ${currentScene?.constructor.name} to ${nextScene.constructor.name}`
+    );
 
-      // Create container for smooth transitions
-      const transitionContainer = new PIXI.Container();
-      game.getStage().addChild(transitionContainer);
+    return new Promise<void>((resolve, reject) => {
+      try {
+        // Create overlay for transition
+        const overlay = new PIXI.Graphics();
+        overlay.beginFill(0x000000);
+        overlay.drawRect(0, 0, game.getApp().renderer.width, game.getApp().renderer.height);
+        overlay.endFill();
+        overlay.alpha = 0;
 
-      // Add current scene to transition container if it exists
-      if (currentScene) {
-        // Clone the current scene's container to avoid removal issues
-        const currentSceneSnapshot = new PIXI.Container();
-        const texture = game.getApp().renderer.generateTexture(currentScene.getContainer());
-        const sprite = new PIXI.Sprite(texture);
-        currentSceneSnapshot.addChild(sprite);
-        transitionContainer.addChild(currentSceneSnapshot);
-      }
+        // Create a standalone transition container that exists above all other elements
+        const transitionContainer = new PIXI.Container();
+        transitionContainer.sortableChildren = true;
+        transitionContainer.zIndex = 9999; // Ensure it's on top
+        game.getStage().addChild(transitionContainer);
 
-      // Add overlay to transition container
-      transitionContainer.addChild(overlay);
+        // Add overlay to transition container
+        transitionContainer.addChild(overlay);
 
-      // Prepare next scene but make it invisible initially
-      nextScene.getContainer().alpha = 0;
+        // Ensure nextScene is initialized but not yet visible
+        nextScene.getContainer().alpha = 0;
 
-      // Fade in the overlay using AnimationManager
-      const overlayFadeInId = 'transition-overlay-in';
-      game.animationManager.animate(
-        overlayFadeInId,
-        overlay,
-        { alpha: 1 },
-        {
-          duration: this.duration / 2,
-          ease: this.ease as any,
-          onComplete: () => {
-            // Next scene preparation
-            if (currentScene) {
-              currentScene.exit(); // Properly exit the current scene
-            }
-
-            nextScene.enter(); // Enter the next scene
-            nextScene.getContainer().alpha = 0; // Keep it invisible
-            transitionContainer.addChild(nextScene.getContainer());
-
-            // Fade in the next scene
-            const nextSceneFadeInId = 'transition-scene-in';
-            game.animationManager.animate(
-              nextSceneFadeInId,
-              nextScene.getContainer(),
-              { alpha: 1 },
-              {
-                duration: 0.01
-              }
-            );
-
-            // Fade out the overlay
-            const overlayFadeOutId = 'transition-overlay-out';
-            game.animationManager.animate(
-              overlayFadeOutId,
-              overlay,
-              { alpha: 0 },
-              {
-                duration: this.duration / 2,
-                ease: this.ease as any,
-                onComplete: () => {
-                  // Clean up transition
-                  game.getStage().removeChild(transitionContainer);
-                  transitionContainer.destroy({ children: true });
-
-                  resolve();
-                }
-              }
-            );
-          }
+        // If it's not already in the stage, add it
+        if (!nextScene.getContainer().parent) {
+          game.getStage().addChild(nextScene.getContainer());
         }
-      );
+
+        // Step 1: Fade the overlay in
+        const fadeInId = 'transition-overlay-in';
+        game.animationManager.animate(
+          fadeInId,
+          overlay,
+          { alpha: 1 },
+          {
+            duration: this.duration / 2,
+            ease: this.ease as any,
+            onComplete: async () => {
+              try {
+                // Step 2: Exit current scene if it exists
+                if (currentScene) {
+                  // Make sure any existing animations on the current scene are stopped
+                  try {
+                    await currentScene.exit();
+                  } catch (error) {
+                    console.warn('Error during scene exit:', error);
+                    // Continue anyway
+                  }
+
+                  // Remove current scene from stage to avoid overlap
+                  if (currentScene.getContainer().parent) {
+                    currentScene.getContainer().parent.removeChild(currentScene.getContainer());
+                  }
+                }
+
+                // Step 3: Enter the next scene
+                try {
+                  await nextScene.enter();
+                } catch (error) {
+                  console.warn('Error during scene enter:', error);
+                  // Continue anyway
+                }
+
+                // Ensure next scene is visible
+                nextScene.getContainer().alpha = 1;
+
+                // Step 4: Fade out the overlay
+                const fadeOutId = 'transition-overlay-out';
+                game.animationManager.animate(
+                  fadeOutId,
+                  overlay,
+                  { alpha: 0 },
+                  {
+                    duration: this.duration / 2,
+                    ease: this.ease as any,
+                    onComplete: () => {
+                      // Clean up transition
+                      game.getStage().removeChild(transitionContainer);
+                      transitionContainer.destroy({ children: true });
+                      console.log('Fade transition completed successfully');
+                      resolve();
+                    }
+                  }
+                );
+              } catch (innerError) {
+                console.error('Error during transition sequence:', innerError);
+
+                // Emergency cleanup
+                game.getStage().removeChild(transitionContainer);
+                transitionContainer.destroy({ children: true });
+
+                // Ensure next scene is visible anyway
+                nextScene.getContainer().alpha = 1;
+                if (!nextScene.getContainer().parent) {
+                  game.getStage().addChild(nextScene.getContainer());
+                }
+
+                reject(innerError);
+              }
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Fatal error in fade transition:', error);
+        reject(error);
+      }
     });
   }
 }
