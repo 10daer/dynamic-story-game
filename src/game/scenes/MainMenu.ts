@@ -35,18 +35,38 @@ export class MainMenuScene extends Scene {
   }
 
   public async init(): Promise<void> {
+    const hasActiveGame = this.game.getLastActiveScene() !== null;
+
+    // Update button text based on game state
+    const startButtonText = this.startButton.getChildAt(1) as PIXI.Text;
+    startButtonText.text = hasActiveGame ? 'Continue Story' : 'Start New Story';
+
     // Add button event listeners
     this.startButton.eventMode = 'static';
     this.startButton.on('pointerdown', () => {
-      console.log('Start button clicked - starting story and switching to story scene');
+      const lastScene = this.game.getLastActiveScene();
 
-      // Start the story
-      this.game.getStoryManager().start();
+      if (lastScene) {
+        console.log('Continue button clicked - resuming story');
 
-      // Switch to the story scene
-      this.game.sceneManager.switchTo('story', 'fade').catch((error) => {
-        console.error('Error switching to story scene:', error);
-      });
+        // Resume the game
+        this.game.continue();
+
+        // Switch back to the story scene
+        this.game.sceneManager.switchTo(lastScene, 'fade').catch((error) => {
+          console.error('Error switching to story scene:', error);
+        });
+      } else {
+        console.log('Start button clicked - starting new story');
+
+        // Start the story
+        this.game.getStoryManager().start();
+
+        // Switch to the story scene
+        this.game.sceneManager.switchTo('story', 'fade').catch((error) => {
+          console.error('Error switching to story scene:', error);
+        });
+      }
     });
 
     this.loadButton.eventMode = 'static';
@@ -67,7 +87,13 @@ export class MainMenuScene extends Scene {
     return Promise.resolve();
   }
 
+  // Update the enter method to refresh the button text on each entry
   public async enter(): Promise<void> {
+    // Update button text based on game state
+    const hasActiveGame = this.game.getLastActiveScene() !== null;
+    const startButtonText = this.startButton.getChildAt(1) as PIXI.Text;
+    startButtonText.text = hasActiveGame ? 'Continue Story' : 'Start New Story';
+
     await super.enter();
 
     // Make sure elements exist and are properly positioned before animation

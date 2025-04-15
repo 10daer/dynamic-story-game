@@ -253,6 +253,52 @@ export class Game extends EventEmitter {
     return this.stateManager.getSaveFiles();
   }
 
+  // Add these methods to your Game class
+  /**
+   * Pause the game
+   */
+  public pause(): void {
+    if (!this.isRunning) return;
+    this.isRunning = false;
+    this.emit('game:pause');
+  }
+
+  /**
+   * Resume/continue the game
+   */
+  public continue(): void {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.lastTime = performance.now(); // Reset the time to avoid jumps
+    this.emit('game:continue');
+  }
+
+  /**
+   * Check if game is currently running
+   */
+  public isGameRunning(): boolean {
+    return this.isRunning;
+  }
+
+  /**
+   * Store the last active scene for returning after pause
+   */
+  private lastActiveScene: string | null = null;
+
+  /**
+   * Set the last active scene (called when pausing)
+   */
+  public setLastActiveScene(sceneKey: string): void {
+    this.lastActiveScene = sceneKey;
+  }
+
+  /**
+   * Get the last active scene (to return after pause)
+   */
+  public getLastActiveScene(): string | null {
+    return this.lastActiveScene;
+  }
+
   /**
    * Delete a saved game
    */

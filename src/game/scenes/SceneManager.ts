@@ -74,12 +74,12 @@ export class SceneManager extends EventEmitter {
       // Get the next scene
       const nextScene = this.scenes.get(key)!;
 
-      // // Make sure to properly exit ALL other scenes
-      // for (const [sceneKey, scene] of this.scenes.entries()) {
-      //   if (sceneKey !== key && scene.isActiveScene()) {
-      //     await scene.exit();
-      //   }
-      // }
+      // Make sure to properly exit ALL other scenes
+      for (const [sceneKey, scene] of this.scenes.entries()) {
+        if (sceneKey !== key && scene.isActiveScene()) {
+          await scene.exit();
+        }
+      }
 
       // Initialize the scene if needed - BEFORE any transitions start
       if (!nextScene.isActiveScene()) {

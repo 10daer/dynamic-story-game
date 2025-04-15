@@ -47,6 +47,9 @@ async function init(): Promise<void> {
       transitionEffect: 'fade',
       minLoadTime: 1500 // Ensure loading screen shows for at least 1.5 seconds
     });
+
+    game.start();
+    console.log('Game started successfully');
   } catch (error) {
     console.error('Game initialization failed:', error);
     alert('Failed to initialize the game. Please refresh the page.');
@@ -58,7 +61,7 @@ function queueAllLoadingOperations(): void {
   // 1. Queue asset loading
   game.loadingManager.queue('assets', async () => {
     try {
-      await game.assetManager.loadAll(assetsToLoad, false);
+      await game.assetManager.loadAll(assetsToLoad);
       console.log('Assets loaded successfully');
     } catch (error) {
       console.warn('Some assets failed to load:', error);
@@ -206,9 +209,6 @@ function setupLoadingListeners(): void {
 
   game.loadingManager.on('loading:complete', () => {
     console.log('Loading completed');
-
-    game.start();
-    console.log('Game started successfully');
   });
 
   game.loadingManager.on('loading:error', (itemKey, error) => {
@@ -228,10 +228,10 @@ function setupEventListeners(): void {
     console.log('Story started');
   });
 
-  game.getStoryManager().on('story:complete', () => {
+  game.getStoryManager().on('story:complete', async () => {
     console.log('Story completed');
     // Handle story completion, maybe show a special scene or return to menu
-    game.sceneManager.switchTo('mainMenu', 'fade');
+    await game.sceneManager.switchTo('mainMenu', 'fade');
   });
 
   game.getStoryManager().on('node:enter', (nodeId: string) => {

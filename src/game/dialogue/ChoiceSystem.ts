@@ -318,8 +318,8 @@ export class ChoiceSystem extends EventEmitter {
     // Add to button container
     button.addChild(background, text);
 
-    // Make button interactive
-    button.interactive = true;
+    // Use eventMode instead of interactive
+    button.eventMode = 'dynamic'; // 'dynamic' is equivalent to interactive = true
     button.cursor = 'pointer';
 
     // Setup button events with animations

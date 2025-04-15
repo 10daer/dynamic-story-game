@@ -36,32 +36,17 @@ export class AssetManager extends EventEmitter {
   /**
    * Load all queued assets
    * @param assetsToLoad Array of assets to load
-   * @param useLoadingManager Whether to use the loading manager (default: true)
    * @returns Promise that resolves when all assets are loaded
    */
-  public async loadAll(
-    assetsToLoad: AssetItem[],
-    useLoadingManager: boolean = true
-  ): Promise<void> {
+  public async loadAll(assetsToLoad: AssetItem[]): Promise<void> {
     if (this.isLoading) {
       console.warn('Assets are already loading');
       return;
     }
 
     this.isLoading = true;
-    this.loadingProgress = 0;
-    this.emit('loading:start');
 
     try {
-      const totalAssets = assetsToLoad.length;
-      let loadedCount = 0;
-
-      const updateProgress = () => {
-        loadedCount += 1;
-        this.loadingProgress = loadedCount / totalAssets;
-        this.emit('loading:progress', this.loadingProgress);
-      };
-
       // Helper to check if asset exists
       const assetExists = async (url: string): Promise<boolean> => {
         try {
@@ -79,7 +64,6 @@ export class AssetManager extends EventEmitter {
         const exists = await assetExists(asset.url);
         if (!exists) {
           console.warn(`Image not found: ${asset.url}`);
-          updateProgress(); // Still update progress for missing ones
           continue;
         }
 
@@ -91,8 +75,6 @@ export class AssetManager extends EventEmitter {
         } catch (e) {
           console.error(`Failed to load image: ${asset.key}`, e);
         }
-
-        updateProgress();
       }
 
       console.log('Successfully loaded all image assets');
@@ -117,7 +99,6 @@ export class AssetManager extends EventEmitter {
           // const exists = await audioAssetExists(asset.url, 'audio/');
           // if (!exists) {
           //   console.warn(`Audio not found or invalid type: ${asset.url}`);
-          //   updateProgress();
           //   return;
           // }
 
@@ -129,12 +110,10 @@ export class AssetManager extends EventEmitter {
               pool: 5,
               onload: () => {
                 this.assets.set(asset.key, sound);
-                updateProgress();
                 resolve();
               },
               onloaderror: (_, err) => {
                 console.error(`Failed to load audio: ${asset.key}`, err);
-                updateProgress();
                 reject();
               }
             });
@@ -142,51 +121,11 @@ export class AssetManager extends EventEmitter {
         })
       );
 
-      this.loadingProgress = 1; // Set to 100%
       this.isLoading = false;
-      this.emit('loading:complete', this.assets);
     } catch (error) {
       this.isLoading = false;
-      this.emit('loading:error', error);
       throw error;
     }
-  }
-
-  /**
-   * Load assets using the LoadingManager
-   * @param assetsToLoad Array of assets to load
-   * @param loadingOptions Optional loading options
-   * @returns Promise that resolves when all assets are loaded
-   */
-  public async loadWithManager(
-    game: any, // Game instance
-    assetsToLoad: AssetItem[],
-    loadingOptions: any = {}
-  ): Promise<void> {
-    if (!game.loadingManager) {
-      console.warn('LoadingManager not available, falling back to standard loading');
-      return this.loadAll(assetsToLoad, false);
-    }
-
-    const defaultOptions = {
-      title: 'Loading Assets...',
-      showProgressBar: true,
-      switchToSceneAfter: '',
-      minLoadTime: 500
-    };
-
-    const options = { ...defaultOptions, ...loadingOptions };
-
-    // Create a load function for the loading manager
-    const loadAssets = async () => {
-      return this.loadAll(assetsToLoad, false);
-    };
-
-    // Queue the loading operation
-    game.loadingManager.queue('assets', loadAssets);
-
-    // Start loading
-    await game.loadingManager.startLoading(options);
   }
 
   /**

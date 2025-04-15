@@ -1,6 +1,5 @@
 import gsap from 'gsap';
 import * as PIXI from 'pixi.js';
-import { StoryChoice } from '../../core/story/StoryData';
 import { Game } from '../../game/Game';
 import { CharacterEmotion } from '../characters/CharacterData';
 import { Scene } from './Scene';
@@ -51,9 +50,16 @@ export class StoryScene extends Scene {
     // Setup event handlers
     this.setupEventHandlers();
 
-    // Setup menu button handler
+    // Setup menu button handler - UPDATED for pause functionality
     this.menuButton.eventMode = 'static';
     this.menuButton.on('pointerdown', () => {
+      // Store the current scene for later resuming
+      this.game.setLastActiveScene('story');
+
+      // Pause the game
+      this.game.pause();
+
+      // Switch to main menu with fade transition
       this.game.sceneManager.switchTo('mainMenu', 'fade');
     });
 
@@ -79,8 +85,6 @@ export class StoryScene extends Scene {
     // Clear characters container
     this.charactersContainer.removeChildren();
 
-    // The dialogue box is now managed by DialogueManager, not here
-
     return Promise.resolve();
   }
 
@@ -93,8 +97,6 @@ export class StoryScene extends Scene {
 
   public update(deltaTime: number, elapsedTime: number): void {
     super.update(deltaTime, elapsedTime);
-    // Update animations or game logic here
-    // DialogueBox has its own update method to handle things like continue indicator
   }
 
   private handleCharacterShow(characterId: string): void {
