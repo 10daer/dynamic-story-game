@@ -6,7 +6,6 @@ import { StoryManager } from '../../core/story/StoryManager';
 import { StoryNode } from '../../core/story/StoryNode';
 import { CharacterActionGenerator } from '../characters/CharacterActionGenerator';
 import { Game } from '../Game';
-import { Scene } from '../scenes/Scene';
 import { ChoiceSystem } from './ChoiceSystem';
 import { DialogueBox, DialogueDisplayOptions } from './DialogueBox';
 
@@ -197,6 +196,8 @@ export class DialogueManager extends EventEmitter {
       return;
     }
 
+    const camelCaseSceneId = sceneId.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+
     const sceneManager = this.game.sceneManager;
 
     // Scene change handler
@@ -211,7 +212,7 @@ export class DialogueManager extends EventEmitter {
     sceneManager.on('scene:changed', onSceneChanged);
 
     // Perform the transition
-    sceneManager.switchTo(sceneId, transitionType);
+    sceneManager.switchTo(camelCaseSceneId, transitionType);
   }
 
   /**

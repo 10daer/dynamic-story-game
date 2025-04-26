@@ -15,15 +15,8 @@ const game = new Game({
 // Initialize and start the game
 async function init(): Promise<void> {
   try {
-    // Register scenes
     const loadingScene = new LoadingScene(game);
     game.sceneManager.register('loading', loadingScene);
-
-    const menuScene = new MainMenuScene(game);
-    game.sceneManager.register('mainMenu', menuScene);
-
-    const storyScene = new StoryScene(game);
-    game.sceneManager.register('story', storyScene);
 
     // Switch to loading scene first
     await game.sceneManager.switchTo('loading');
@@ -53,6 +46,21 @@ async function init(): Promise<void> {
   }
 }
 
+function registerScenes(): void {
+  const menuScene = new MainMenuScene(game);
+  game.sceneManager.register('mainMenu', menuScene);
+
+  // Dynamically register StoryScene for each sceneId
+  game
+    .getStoryManager()
+    .getStory()
+    ?.sceneIds.forEach((sceneId: string) => {
+      const scene = new StoryScene(game);
+      const camelCaseSceneId = sceneId.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+      game.sceneManager.register(camelCaseSceneId, scene);
+    });
+}
+
 // Queue all loading operations
 function queueAllLoadingOperations(): void {
   // 1. Queue asset loading
@@ -65,29 +73,37 @@ function queueAllLoadingOperations(): void {
     }
   });
 
-  // 2. Queue scene initialization
-  game.loadingManager.queue('scenes', async () => {
+  // 2. Queue story loading
+  game.loadingManager.queue('story', async () => {
     try {
-      const loadingScene = game.sceneManager.getScene('loading') as LoadingScene;
-      const menuScene = game.sceneManager.getScene('mainMenu') as MainMenuScene;
-      const storyScene = game.sceneManager.getScene('story') as StoryScene;
-
-      await loadingScene.init();
-      await menuScene.init();
-      await storyScene.init();
+      const storyData = await game.assetManager.loadText('assets/stories/story-grok.yaml');
+      game.getStoryManager().loadFromYaml(storyData);
     } catch (error) {
-      console.error('Failed to initialize scenes:', error);
+      console.error('Failed to load story:', error);
       throw error;
     }
   });
 
-  // 3. Queue story loading
-  game.loadingManager.queue('story', async () => {
+  // 3. Queue scene registration
+  game.loadingManager.queue('registerScenes', async () => {
     try {
-      const storyData = await game.assetManager.loadText('assets/stories/story.yaml');
-      game.getStoryManager().loadFromYaml(storyData);
+      registerScenes();
     } catch (error) {
-      console.error('Failed to load story:', error);
+      console.error('Failed to register scenes:', error);
+      throw error;
+    }
+  });
+
+  // 3. Queue scene initialization
+  game.loadingManager.queue('scenes', async () => {
+    try {
+      const scenes = game.sceneManager.getAllScenes();
+
+      for (const [_, scene] of scenes) {
+        await scene.init();
+      }
+    } catch (error) {
+      console.error('Failed to initialize scenes:', error);
       throw error;
     }
   });

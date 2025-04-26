@@ -200,6 +200,19 @@ export class SceneManager extends EventEmitter {
     return this.currentScene;
   }
 
+  /**
+   * Get the current scene's ID
+   * @returns The key of the current scene or null if no scene is active
+   */
+  public getCurrentSceneId(): string {
+    for (const [key, scene] of this.scenes.entries()) {
+      if (scene === this.currentScene) {
+        return key;
+      }
+    }
+    return '';
+  }
+
   // Add this method to your SceneManager class in SceneManager.ts
   /**
    * Change background for the current scene
@@ -225,6 +238,14 @@ export class SceneManager extends EventEmitter {
    */
   public getScene(key: string): Scene | undefined {
     return this.scenes.get(key);
+  }
+
+  /**
+   * Get all registered scenes
+   * @returns An array of all scenes
+   */
+  public getAllScenes(): Map<string, Scene> {
+    return this.scenes;
   }
 
   /**

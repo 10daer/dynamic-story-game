@@ -195,6 +195,9 @@ export interface Story {
   // Starting node
   startNode: string;
 
+  // SceneIds
+  sceneIds: Record<string, any>;
+
   // Story content
   nodes: Record<string, StoryNode>;
 }

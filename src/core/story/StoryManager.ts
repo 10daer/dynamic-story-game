@@ -116,6 +116,7 @@ export class StoryManager extends EventEmitter {
   public loadFromYaml(yamlData: string): void {
     try {
       this.story = StoryParser.parseFromYaml(yamlData);
+      this.setSceneIds();
       this.initializeStory();
     } catch (error) {
       console.error('Failed to load story from YAML:', error);
@@ -440,6 +441,25 @@ export class StoryManager extends EventEmitter {
 
     // Emit state changed event
     this.emit('state:changed', this.gameState, prevState, changes);
+  }
+
+  /**
+   * Get all unique scene IDs from the story
+   */
+  public setSceneIds(): void {
+    if (!this.story) {
+      throw new Error('No story loaded');
+    }
+
+    const sceneIds = new Set<string>();
+    Object.values(this.story.nodes).forEach((node: any) => {
+      if (node.type === 'scene' && node.sceneId) {
+        sceneIds.add(node.sceneId);
+      }
+    });
+
+    // Add scene IDs to the story object
+    this.story.sceneIds = Array.from(sceneIds);
   }
 
   /**

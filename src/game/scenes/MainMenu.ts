@@ -59,7 +59,7 @@ export class MainMenuScene extends Scene {
         this.game.getStoryManager().start();
 
         // Switch to the story scene
-        this.game.sceneManager.switchTo('story', 'fade').catch((error) => {
+        this.game.sceneManager.switchTo('forestEntranceScene', 'fade').catch((error) => {
           console.error('Error switching to story scene:', error);
         });
       }

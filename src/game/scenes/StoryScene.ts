@@ -178,8 +178,11 @@ export class StoryScene extends Scene {
     // Setup menu button handler
     this.menuButton.eventMode = 'static';
     this.menuButton.on('pointerdown', () => {
-      // Store the current scene for later resuming
-      this.game.setLastActiveScene('story');
+      // Get the current active scene ID
+      const currentSceneId = this.game.sceneManager.getCurrentSceneId();
+
+      // Store the current scene ID for later resuming
+      this.game.setLastActiveScene(currentSceneId);
 
       // Pause the game
       this.game.pause();

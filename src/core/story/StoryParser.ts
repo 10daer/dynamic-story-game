@@ -1,4 +1,5 @@
 import YAML from 'yaml';
+import { CharacterEmotion } from '../../game/characters/CharacterData';
 import { Story, StoryNode } from './StoryData';
 
 export class StoryParser {
@@ -48,9 +49,9 @@ export class StoryParser {
     }
 
     // Validate each node
-    // for (const [nodeId, node] of Object.entries(data.nodes)) {
-    //   this.validateNode(nodeId, node as StoryNode, data.nodes);
-    // }
+    for (const [nodeId, node] of Object.entries(data.nodes)) {
+      this.validateNode(nodeId, node as StoryNode, data.nodes);
+    }
 
     // Check for unreachable nodes (optional, can be resource-intensive for large stories)
     // this.checkForUnreachableNodes(data);
@@ -80,6 +81,9 @@ export class StoryParser {
         if (!node.text) {
           throw new Error(`Dialogue node '${nodeId}' must have text`);
         }
+        if (!node.characterId) {
+          throw new Error(`Dialogue node '${nodeId}' must have a characterId`);
+        }
         break;
 
       case 'choice':
@@ -87,12 +91,10 @@ export class StoryParser {
           throw new Error(`Choice node '${nodeId}' must have at least one choice`);
         }
 
-        // Validate that all choice nextNodes exist
         for (const choice of node.choices) {
           if (!choice.nextNode) {
             throw new Error(`Choice in node '${nodeId}' must have a nextNode`);
           }
-
           if (!allNodes[choice.nextNode]) {
             throw new Error(
               `Choice nextNode '${choice.nextNode}' in node '${nodeId}' does not exist`
@@ -105,27 +107,54 @@ export class StoryParser {
         if (!node.condition) {
           throw new Error(`Branch node '${nodeId}' must have a condition`);
         }
-
         if (!node.nextNode) {
           throw new Error(`Branch node '${nodeId}' must have a nextNode`);
         }
         break;
 
       case 'scene':
-        if (allNodes[nodeId].type === 'scene' && !allNodes[nodeId].sceneId) {
-          throw new Error(`Branch node '${nodeId}' must have a sceneId`);
+        if (!node.sceneId) {
+          throw new Error(`Scene node '${nodeId}' must have a sceneId`);
+        }
+        if (!node.characters || !Array.isArray(node.characters)) {
+          throw new Error(`Scene node '${nodeId}' must have a characters array`);
+        }
+        const validPositions = ['left', 'center', 'right', 'offscreenleft', 'offscreenright'];
+
+        for (const [index, char] of node.characters.entries()) {
+          if (!char.id) {
+            throw new Error(`Character at index ${index} in node '${nodeId}' must have an id`);
+          }
+          if (!char.position) {
+            throw new Error(`Character '${char.id}' in node '${nodeId}' must have a position`);
+          }
+          if (!validPositions.includes(char.position.toLowerCase())) {
+            throw new Error(
+              `Invalid position '${char.position}' for character '${char.id}' in node '${nodeId}'`
+            );
+          }
+          if (
+            char.expression &&
+            !Object.values(CharacterEmotion).includes(
+              char.expression.toLowerCase() as CharacterEmotion
+            )
+          ) {
+            throw new Error(
+              `Invalid expression '${char.expression}' for character '${char.id}' in node '${nodeId}'`
+            );
+          }
         }
         break;
 
       case 'end':
-        // End nodes don't need validation
+        // End node doesn't need extra validation
         break;
 
       default:
         throw new Error(`Unknown node type '${node.type}' in node '${nodeId}'`);
     }
 
-    // Validate nextNode exists if specified
+    // Validate nextNode if specified
     if (node.nextNode && !allNodes[node.nextNode]) {
       throw new Error(`NextNode '${node.nextNode}' in node '${nodeId}' does not exist`);
     }
@@ -143,14 +172,22 @@ export class StoryParser {
     }
 
     // Validate dialogue options if present
-    if (node.dialogueOptions) {
-      // Basic validation for dialogue options
+    if (node.dialogueOptions?.textEffects) {
       if (
-        node.dialogueOptions.textEffects &&
         !['wave', 'shake', 'bounce', 'typewriter'].includes(node.dialogueOptions.textEffects.type)
       ) {
         throw new Error(`Invalid text effect type in node '${nodeId}'`);
       }
+    }
+
+    // Validate metadata emotion
+    if (
+      node.metadata?.emotion &&
+      !Object.values(CharacterEmotion).includes(
+        node.metadata.emotion.toLowerCase() as CharacterEmotion
+      )
+    ) {
+      throw new Error(`Invalid emotion '${node.metadata.emotion}' in node '${nodeId}'`);
     }
   }
 
